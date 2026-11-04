@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learn Path Adviser - Install for Cowork</title>
+<meta name="description" content="Install and update the Learn Path Adviser plugin for Microsoft Copilot Cowork.">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="#top">
+      <img src="assets/logo.png" alt="" width="28" height="28">
+      Learn Path Adviser
+    </a>
+    <nav>
+      <a href="#overview">Overview</a>
+      <a href="#install">Install</a>
+      <a href="#verify">Verify</a>
+      <a href="#update">Update</a>
+      <a href="https://github.com/true-while/Learn-Path-Adviser">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero container">
+    <h1>Learn Path Adviser</h1>
+    <p class="tagline">
+      One combined summary across Word, PDF, text, PowerPoint, and Excel files -
+      a plugin for Microsoft Copilot Cowork.
+    </p>
+    <div class="cta">
+      <a class="button primary" href="https://github.com/true-while/Learn-Path-Adviser/releases/latest">
+        Download latest release (.zip)
+      </a>
+      <a class="button" href="https://github.com/true-while/Learn-Path-Adviser">View source on GitHub</a>
+    </div>
+  </section>
+
+  <section id="overview" class="container">
+    <h2>Overview</h2>
+    <p>
+      Point Learn Path Adviser at a mixed batch of files - <code>.docx</code>, <code>.pdf</code>,
+      <code>.txt</code>, <code>.pptx</code>, <code>.xlsx</code>/<code>.xls</code> - and it reads all
+      of them and returns a single consolidated summary: cross-file themes, per-file highlights,
+      gaps/overlaps, and a suggested learning path. It never produces a separate summary per file.
+    </p>
+    <figure>
+      <img src="assets/screenshots/plugins-list.png" alt="Cowork installed plugins list showing Learn Path Adviser">
+      <figcaption>Cowork &gt; Customize &gt; Plugins, with Learn Path Adviser installed.</figcaption>
+    </figure>
+  </section>
+
+  <section id="install" class="container">
+    <h2>Install</h2>
+    <ol class="steps">
+      <li>
+        Download the latest release ZIP from
+        <a href="https://github.com/true-while/Learn-Path-Adviser/releases/latest">GitHub Releases</a>,
+        or build it yourself from source:
+        <div class="code-block">
+          <pre><code>./scripts/package.ps1</code></pre>
+          <button class="copy-btn" type="button">Copy</button>
+        </div>
+        This produces <code>dist/learn-path-adviser.zip</code>.
+      </li>
+      <li>Open <strong>Cowork &gt; Customize &gt; Plugins &gt; Add plugin</strong>.</li>
+      <li>
+        Select <strong>choose a file</strong> and pick <code>learn-path-adviser.zip</code>, or drag
+        and drop it into the dialog.
+        <figure>
+          <img src="assets/screenshots/add-plugin-dialog.png" alt="Cowork Add Plugin dialog">
+          <figcaption>Cowork's Add Plugin dialog.</figcaption>
+        </figure>
+      </li>
+      <li>Follow the on-screen installation and consent steps.</li>
+      <li>Confirm <strong>Learn Path Adviser</strong> appears in the installed plugins list.</li>
+    </ol>
+    <p class="note">
+      Tenant policy must permit plugin installation. If installation is blocked, contact your
+      administrator - this package does not bypass any policy.
+    </p>
+  </section>
+
+  <section id="verify" class="container">
+    <h2>Verify</h2>
+    <p>Start a new Cowork conversation and try the prompt below:</p>
+    <div class="code-block">
+      <pre><code>Summarize these files into one combined summary using Learn Path Adviser: &lt;attach/select 2+ files
+in Word, PDF, text, PowerPoint, and/or Excel format&gt;.</code></pre>
+      <button class="copy-btn" type="button">Copy</button>
+    </div>
+    <figure>
+      <img src="assets/screenshots/combined-summary-output.png" alt="Combined summary output in chat">
+      <figcaption>Expected result: one combined summary, not one per file.</figcaption>
+    </figure>
+    <p>
+      Confirm the response follows the structure in
+      <a href="https://github.com/true-while/Learn-Path-Adviser/blob/main/skills/learn-path-adviser/references/SUMMARY-TEMPLATE.md">SUMMARY-TEMPLATE.md</a>.
+    </p>
+  </section>
+
+  <section id="update" class="container">
+    <h2>Update</h2>
+    <ol class="steps">
+      <li>Make changes under <code>skills/learn-path-adviser/</code>.</li>
+      <li>
+        Bump <code>version</code> in <code>manifest.json</code> and <code>metadata.version</code> in
+        <code>SKILL.md</code>.
+      </li>
+      <li>
+        Re-run the packaging script to produce a new ZIP:
+        <div class="code-block">
+          <pre><code>./scripts/package.ps1</code></pre>
+          <button class="copy-btn" type="button">Copy</button>
+        </div>
+      </li>
+      <li>
+        In Cowork, open <strong>Customize &gt; Plugins</strong>, select Learn Path Adviser, and
+        upload the new ZIP to update it in place.
+      </li>
+    </ol>
+    <p class="note">
+      Keep the same <code>id</code> (GUID) in <code>manifest.json</code> across updates so Cowork
+      treats it as an update to the existing plugin rather than a new installation.
+    </p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <a href="https://github.com/true-while/Learn-Path-Adviser">Learn-Path-Adviser on GitHub</a>
+    <span>&middot;</span>
+    <a href="https://github.com/true-while/Learn-Path-Adviser/blob/main/INSTALL.md">INSTALL.md</a>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
