@@ -3,6 +3,11 @@
 Produce exactly one summary using this structure, regardless of how many files were analyzed.
 Omit a section only if it genuinely does not apply (e.g. no unreadable files).
 
+If the summary is delivered as a Word (`.docx`) document, its main heading must be exactly
+**"Skilling Paths proposal"** - put the scenario/batch name on a subtitle line underneath instead of
+in the main heading. For chat text or a Page, the `# <Scenario/Batch Name> - Combined Analysis`
+heading below is still used as-is.
+
 ```text
 # <Scenario/Batch Name> - Combined Analysis
 

@@ -11,12 +11,12 @@ description: |2
   independent summary per file - handle each file individually instead. Do NOT use this skill to
   generate new slide decks, documents, or workbooks from scratch (use the built-in docx/pptx/xlsx
   skills for that); this skill only reads and summarizes existing files.
-metadata: {version: "1.0.1", cowork-category: "productivity", cowork-icon: "BookOpen"}
+metadata: {version: "1.0.3", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
 
-- **Current version:** `1.0.0`
+- **Current version:** `1.0.3`
 - **Supported formats reference:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
 - **Output template reference:** [references/SUMMARY-TEMPLATE.md](references/SUMMARY-TEMPLATE.md)
 
@@ -83,6 +83,11 @@ analyzed file but must remain one document/response, not a collection of per-fil
 
 Confirm with the user, if ambiguous, whether the summary should be returned as chat text, a Word
 document, or a Page - never assume a destination folder.
+
+If the output is generated as a Word (`.docx`) document, the document's main heading (the first,
+top-level title) must be exactly **"Skilling Paths proposal"**. Use this heading regardless of the
+scenario/batch name - put any scenario-specific name on a subtitle/second line below it instead of
+replacing it.
 
 ## Edge Cases
 
