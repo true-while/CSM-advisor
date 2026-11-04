@@ -11,7 +11,7 @@ description: |2
   independent summary per file - handle each file individually instead. Do NOT use this skill to
   generate new slide decks, documents, or workbooks from scratch (use the built-in docx/pptx/xlsx
   skills for that); this skill only reads and summarizes existing files.
-metadata: {version: "1.0.0", cowork-category: "productivity", cowork-icon: "BookOpen"}
+metadata: {version: "1.0.1", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
