@@ -1,86 +1,65 @@
 # Installing Learn Path Adviser in Cowork
 
+**Learn Path Adviser** reads your Word, PDF, text, PowerPoint, and Excel files and gives you back
+one combined summary plus a suggested learning path. No technical setup is needed - just download
+the plugin and add it in Cowork.
 
-This folder is the source for the **Learn Path Adviser** plugin. Cowork installs plugins from a
-ZIP archive containing `manifest.json`, the icon PNGs, and the `skills/` folder - you do not
-install this source folder directly.
+## 1. Download
 
-## Download (always the latest version)
+Download the plugin ZIP using the link below. It always points to the newest version - you don't
+need to build or unzip anything yourself:
 
-A GitHub Actions workflow ([.github/workflows/release.yml](.github/workflows/release.yml)) builds
-and publishes the ZIP automatically, so you don't need to build it yourself. The link below always
-resolves to the newest published version:
-
-```text
-https://github.com/true-while/Learn-Path-Adviser/releases/latest/download/learn-path-adviser.zip
-```
+[**Download Learn Path Adviser**](https://github.com/true-while/Learn-Path-Adviser/releases/latest/download/learn-path-adviser.zip)
 
 <!-- latest-version:start -->
 Latest published version: **v1.0.3** (released 2026-11-04) - [release notes](https://github.com/true-while/Learn-Path-Adviser/releases/tag/v1.0.3)
 <!-- latest-version:end -->
 
-Every version is also kept as its own release (tagged `v<version>`) on the
-[Releases page](https://github.com/true-while/Learn-Path-Adviser/releases), so you can install an
-older version if needed.
-
-## 1. Build the ZIP (manual/local alternative)
-
-From this folder, run the packaging script:
-
-```powershell
-./scripts/package.ps1
-```
-
-This produces `dist/learn-path-adviser.zip` containing exactly:
-
-```text
-manifest.json
-color.png
-outline.png
-skills/
-  learn-path-adviser/
-    SKILL.md
-    references/
-      SUPPORTED-FORMATS.md
-      SUMMARY-TEMPLATE.md
-```
+Keep the downloaded `learn-path-adviser.zip` file intact - don't unzip it or edit its contents.
+(Every past version also stays available on the [Releases page](https://github.com/true-while/Learn-Path-Adviser/releases) if you ever need an older one.)
 
 ## 2. Install in Cowork
 
-1. Download `learn-path-adviser.zip` (from the stable link above, a specific release, or your own
-   local build) to a machine with access to Cowork.
-2. Open **Cowork > Customize > Plugins > Add plugin**.
-3. Select **choose a file** and pick `learn-path-adviser.zip`, or drag and drop it into the dialog.
-4. Follow the on-screen installation and consent steps.
-5. Confirm **Learn Path Adviser** appears in the installed plugins list.
+1. Open **Cowork > Customize > Plugins > Add plugin**.
+2. Select **choose a file** and pick the `learn-path-adviser.zip` you downloaded, or drag and drop
+   it into the dialog.
+3. Follow the on-screen installation and consent steps.
+4. Confirm **Learn Path Adviser** appears in your installed plugins list.
 
 Tenant policy must permit plugin installation. If installation is blocked, contact your
-administrator - this package does not bypass any policy.
+administrator - this plugin does not bypass any policy.
 
-## 3. Verify
+## 3. Try it out
 
-Start a new Cowork conversation and try:
+Start a new Cowork conversation and paste in the prompt below (attach 2 or more files first - any
+mix of Word, PDF, text, PowerPoint, and Excel):
 
 ```text
 Summarize these files into one combined summary using Learn Path Adviser: <attach/select 2+ files
 in Word, PDF, text, PowerPoint, and/or Excel format>.
 ```
 
-Confirm the response is a single combined summary (not one summary per file) and that it follows
-the structure in `skills/learn-path-adviser/references/SUMMARY-TEMPLATE.md`.
+You should get back one combined summary covering all of the files together, not a separate
+summary per file.
 
-## 4. Updating
+## Updating to a newer version
 
-To ship an update:
+When a new version is published, repeat the install steps above with the same download link -
+Cowork will update the existing plugin in place rather than installing a second copy.
+
+---
+
+## For maintainers
+
+To ship a change to this plugin:
 
 1. Make your changes under `skills/learn-path-adviser/`.
 2. Bump `version` in `manifest.json` and the `metadata.version` field in `SKILL.md`.
-3. Push to `main`. The release workflow detects the version bump, builds the ZIP, and publishes it
-   as a new GitHub Release tagged `v<version>` - the stable "latest" link then points at it
-   automatically. (You can also build locally with `./scripts/package.ps1`, or trigger the workflow
-   manually from the **Actions** tab.)
-4. In Cowork, open **Customize > Plugins**, select Learn Path Adviser, and upload the new ZIP to
-   update it in place.
+3. Push to `main`. The release workflow ([.github/workflows/release.yml](.github/workflows/release.yml))
+   detects the version bump, builds the ZIP, publishes it as a new GitHub Release tagged
+   `v<version>`, and updates the "Latest published version" line above automatically - the download
+   link always serves the newest release. (You can also trigger the workflow manually from the
+   **Actions** tab.)
 
 Keep the same `id` (GUID) in `manifest.json` across updates so Cowork treats it as an update to the
 existing plugin rather than a new installation. The release workflow never overwrites or replaces an
