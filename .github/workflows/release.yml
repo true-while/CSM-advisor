@@ -1,0 +1,70 @@
+name: Release Cowork Plugin
+
+# Builds dist/learn-path-adviser.zip and publishes it as a GitHub Release tagged with the
+# manifest.json version whenever that version changes on main. Existing version tags/releases are
+# never overwritten, and the "latest" release always exposes a stable download link:
+#   https://github.com/<owner>/<repo>/releases/latest/download/learn-path-adviser.zip
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - manifest.json
+      - color.png
+      - outline.png
+      - skills/**
+      - scripts/package.ps1
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from manifest.json
+        id: version
+        shell: pwsh
+        run: |
+          $manifest = Get-Content manifest.json -Raw | ConvertFrom-Json
+          $version = $manifest.version
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            throw "manifest.json has no 'version' field"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Check whether this version was already released
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build plugin ZIP
+        if: steps.check.outputs.exists == 'false'
+        shell: pwsh
+        run: ./scripts/package.ps1
+
+      - name: Publish release v${{ steps.version.outputs.version }}
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            dist/learn-path-adviser.zip \
+            --repo "${{ github.repository }}" \
+            --title "Learn Path Adviser v${{ steps.version.outputs.version }}" \
+            --notes "Automated release built from manifest.json version ${{ steps.version.outputs.version }}. Install via Cowork > Customize > Plugins > Add plugin."
+
+      - name: Skip - version already released
+        if: steps.check.outputs.exists == 'true'
+        run: |
+          echo "Release v${{ steps.version.outputs.version }} already exists - bump manifest.json's 'version' (and SKILL.md metadata.version) to publish a new one."
