@@ -1,5 +1,6 @@
 # Installing Learn Path Adviser in Cowork
 
+
 This folder is the source for the **Learn Path Adviser** plugin. Cowork installs plugins from a
 ZIP archive containing `manifest.json`, the icon PNGs, and the `skills/` folder - you do not
 install this source folder directly.
