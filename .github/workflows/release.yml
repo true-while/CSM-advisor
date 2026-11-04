@@ -64,6 +64,23 @@ jobs:
             --title "Learn Path Adviser v${{ steps.version.outputs.version }}" \
             --notes "Automated release built from manifest.json version ${{ steps.version.outputs.version }}. Install via Cowork > Customize > Plugins > Add plugin."
 
+      - name: Update INSTALL.md with latest version
+        if: steps.check.outputs.exists == 'false'
+        run: python3 scripts/update_install_version.py "${{ steps.version.outputs.version }}" "${{ github.repository }}"
+
+      - name: Commit updated INSTALL.md
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add INSTALL.md
+          if git diff --cached --quiet; then
+            echo "INSTALL.md unchanged, nothing to commit"
+          else
+            git commit -m "docs: record latest release v${{ steps.version.outputs.version }} in INSTALL.md"
+            git push
+          fi
+
       - name: Skip - version already released
         if: steps.check.outputs.exists == 'true'
         run: |
