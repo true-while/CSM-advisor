@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.28/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.28",
+  "version": "1.0.0",
+  "id": "3f287312-fe62-4f2d-b0a0-16a625ceffaa",
+  "developer": {
+    "name": "<Your name or organization>",
+    "websiteUrl": "https://example.com",
+    "privacyUrl": "https://example.com/privacy",
+    "termsOfUseUrl": "https://example.com/terms"
+  },
+  "name": {
+    "short": "Learn Path Adviser",
+    "full": "Learn Path Adviser for Microsoft Copilot Cowork"
+  },
+  "description": {
+    "short": "Analyzes Word, PDF, text, PowerPoint and Excel files and produces one combined summary.",
+    "full": "Learn Path Adviser reads a set of files in Word (.docx), PDF (.pdf), plain text (.txt), PowerPoint (.pptx) and Excel (.xlsx/.xls) formats, extracts their content, and produces a single consolidated summary covering all analyzed files together - including cross-file themes and a suggested learning path - instead of one summary per file."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#2B579A",
+  "agentSkills": [
+    {
+      "folder": "./skills/learn-path-adviser"
+    }
+  ]
+}
