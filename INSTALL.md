@@ -16,7 +16,7 @@ https://github.com/true-while/Learn-Path-Adviser/releases/latest/download/learn-
 ```
 
 <!-- latest-version:start -->
-Latest published version: **v1.0.0** (released 2026-11-04) - [release notes](https://github.com/true-while/Learn-Path-Adviser/releases/tag/v1.0.0)
+Latest published version: **v1.0.1** (released 2026-11-04) - [release notes](https://github.com/true-while/Learn-Path-Adviser/releases/tag/v1.0.1)
 <!-- latest-version:end -->
 
 Every version is also kept as its own release (tagged `v<version>`) on the
