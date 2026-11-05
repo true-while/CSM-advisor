@@ -20,14 +20,16 @@ Keep the downloaded `learn-path-adviser.zip` file intact - don't unzip it or edi
 
 ## 2. Install in Cowork
 
-1. Open **Cowork > Customize > Plugins > Add plugin**.
-2. Select **choose a file** and pick the `learn-path-adviser.zip` you downloaded, or drag and drop
-   it into the dialog.
-3. Follow the on-screen installation and consent steps.
-4. Confirm **Learn Path Adviser** appears in your installed plugins list.
+1. Open **Cowork > Customize > Add > Upload**.
+2. Select **choose a file** and pick the `learn-path-adviser.zip` you downloaded, or drag and drop it into the dialog.
+   
+![Add plugin](addplugin.png)
 
-Tenant policy must permit plugin installation. If installation is blocked, contact your
-administrator - this plugin does not bypass any policy.
+1. Follow the on-screen installation and consent steps.
+2. Confirm **Learn Path Adviser** appears in your installed plugins list.
+
+
+
 
 ## 3. Try it out
 
