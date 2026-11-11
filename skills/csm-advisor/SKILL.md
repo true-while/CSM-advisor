@@ -8,12 +8,12 @@ description: >-
   hand-picks Microsoft Learn modules. Stage 4 writes a Skilling Paths proposal Word document by
   audience. Use for customer signals, readiness, skilling path selection, or a skilling plan. Do NOT
   use for a per-file summary or to author new decks, documents, or workbooks.
-metadata: {version: "1.1.8", cowork-category: "productivity", cowork-icon: "BookOpen"}
+metadata: {version: "1.1.9", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
 
-- **Current version:** `1.1.8`
+- **Current version:** `1.1.9`
 - **Stages 1-2 - signal collection rules:** [references/SIGNAL-COLLECTION.md](references/SIGNAL-COLLECTION.md)
 - **Stage 1 - supported formats:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
 - **Stage 1 - Teams meeting recaps:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
