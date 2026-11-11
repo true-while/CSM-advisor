@@ -1,24 +1,19 @@
 ---
 name: learn-path-adviser
-description: |2
-   Analyzes a set of files in Word (.docx), PDF (.pdf), plain text (.txt), PowerPoint (.pptx),
-  and Excel (.xlsx/.xls) formats and produces exactly ONE consolidated summary covering all of the
-  analyzed files combined - not one summary per file. The summary surfaces cross-file themes,
-  overlaps, gaps, and a suggested learning path. Use when the user asks to "summarize these
-  documents", "analyze these files", "review this set of training materials", "build me a learning
-  path from these files", "give me one summary of everything in this folder", or similar requests
-  that involve two or more mixed-format files. Can also include the current user's Microsoft Teams
-  meeting recaps (AI notes, summaries, transcripts) as additional sources when the user asks for
-  them (e.g. "include my recent meeting recaps", "add the Teams meetings from last week"). Do NOT use when the user explicitly wants a separate,
-  independent summary per file - handle each file individually instead. Do NOT use this skill to
-  generate new slide decks, documents, or workbooks from scratch (use the built-in docx/pptx/xlsx
-  skills for that); this skill only reads and summarizes existing files.
-metadata: {version: "1.1.0", cowork-category: "productivity", cowork-icon: "BookOpen"}
+description: >-
+  Analyzes files in Word (.docx), PDF, text (.txt), PowerPoint (.pptx), and Excel (.xlsx/.xls)
+  formats, optionally plus the user's Microsoft Teams meeting recaps, and produces exactly ONE
+  consolidated summary of all sources combined, with cross-file themes, gaps, and a suggested
+  learning path. Use when the user asks to "summarize these documents", "analyze these files",
+  "build a learning path from these files", "one summary of everything in this folder", or to
+  "include my Teams meeting recaps". Do NOT use when the user wants a separate summary per file,
+  or to create new decks, documents, or workbooks (use the built-in docx/pptx/xlsx skills).
+metadata: {version: "1.1.1", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
 
-- **Current version:** `1.1.0`
+- **Current version:** `1.1.1`
 - **Supported formats reference:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
 - **Output template reference:** [references/SUMMARY-TEMPLATE.md](references/SUMMARY-TEMPLATE.md)
 - **Teams meeting recaps reference:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
