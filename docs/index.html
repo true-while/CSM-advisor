@@ -107,17 +107,10 @@ in Word, PDF, text, PowerPoint, and/or Excel format&gt;.</code></pre>
   <section id="update" class="container">
     <h2>Update</h2>
     <ol class="steps">
-      <li>Make changes under <code>skills/csm-advisor/</code>.</li>
       <li>
-        Bump <code>version</code> in <code>manifest.json</code> and <code>metadata.version</code> in
-        <code>SKILL.md</code>.
-      </li>
-      <li>
-        Re-run the packaging script to produce a new ZIP:
-        <div class="code-block">
-          <pre><code>./scripts/package.ps1</code></pre>
-          <button class="copy-btn" type="button">Copy</button>
-        </div>
+        Download the newest ZIP from the
+        <a href="https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip">latest release</a>
+        - every update is published automatically as a new version.
       </li>
       <li>
         In Cowork, open <strong>Customize &gt; Plugins</strong>, select CSM Advisor, and
@@ -125,8 +118,8 @@ in Word, PDF, text, PowerPoint, and/or Excel format&gt;.</code></pre>
       </li>
     </ol>
     <p class="note">
-      Keep the same <code>id</code> (GUID) in <code>manifest.json</code> across updates so Cowork
-      treats it as an update to the existing plugin rather than a new installation.
+      Maintainers: every push to <code>main</code> builds and publishes a new version
+      automatically. See <a href="https://github.com/true-while/CSM-advisor/blob/main/INSTALL.md">INSTALL.md</a>.
     </p>
   </section>
 </main>

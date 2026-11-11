@@ -1,87 +1,71 @@
 name: Release Cowork Plugin
 
-# Builds dist/CSM-advisor.zip and publishes it as a GitHub Release tagged with the
-# manifest.json version whenever that version changes on main. Existing version tags/releases are
-# never overwritten, and the "latest" release always exposes a stable download link:
+# On every push to main this workflow picks the next version, builds dist/CSM-advisor.zip and
+# publishes it as a GitHub Release tagged v<version>. The version is auto-incremented (patch)
+# from the existing release tags; to start a new major/minor line, set e.g. "1.2.0" in
+# manifest.json. The bumped manifest.json, SKILL.md and INSTALL.md are committed back to main
+# (commits pushed with GITHUB_TOKEN do not re-trigger this workflow). Existing releases are never
+# overwritten, and the "latest" release exposes a stable download link:
 #   https://github.com/<owner>/<repo>/releases/latest/download/CSM-advisor.zip
 
 on:
   push:
     branches: [main]
-    paths:
-      - manifest.json
-      - color.png
-      - outline.png
-      - skills/**
-      - scripts/package.ps1
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout latest main
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
-      - name: Read version from manifest.json
+      - name: Compute next version
         id: version
-        shell: pwsh
         run: |
-          $manifest = Get-Content manifest.json -Raw | ConvertFrom-Json
-          $version = $manifest.version
-          if ([string]::IsNullOrWhiteSpace($version)) {
-            throw "manifest.json has no 'version' field"
-          }
-          "version=$version" >> $env:GITHUB_OUTPUT
+          version="$(python3 scripts/next_version.py)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Next version: $version"
 
-      - name: Check whether this version was already released
-        id: check
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update INSTALL.md with latest version
+        run: python3 scripts/update_install_version.py "${{ steps.version.outputs.version }}" "${{ github.repository }}"
+
+      - name: Commit version bump
         run: |
-          if gh release view "v${{ steps.version.outputs.version }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest.json skills INSTALL.md
+          if git diff --cached --quiet; then
+            echo "No version changes to commit"
           else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+            git commit -m "chore: release v${{ steps.version.outputs.version }} [skip ci]"
+            git pull --rebase origin main
+            git push origin main
           fi
 
       - name: Build plugin ZIP
-        if: steps.check.outputs.exists == 'false'
         shell: pwsh
         run: ./scripts/package.ps1
 
       - name: Publish release v${{ steps.version.outputs.version }}
-        if: steps.check.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "v${{ steps.version.outputs.version }}" \
             dist/CSM-advisor.zip \
             --repo "${{ github.repository }}" \
+            --target "$(git rev-parse HEAD)" \
             --title "CSM Advisor v${{ steps.version.outputs.version }}" \
-            --notes "Automated release built from manifest.json version ${{ steps.version.outputs.version }}. Install via Cowork > Customize > Plugins > Add plugin."
-
-      - name: Update INSTALL.md with latest version
-        if: steps.check.outputs.exists == 'false'
-        run: python3 scripts/update_install_version.py "${{ steps.version.outputs.version }}" "${{ github.repository }}"
-
-      - name: Commit updated INSTALL.md
-        if: steps.check.outputs.exists == 'false'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add INSTALL.md
-          if git diff --cached --quiet; then
-            echo "INSTALL.md unchanged, nothing to commit"
-          else
-            git commit -m "docs: record latest release v${{ steps.version.outputs.version }} in INSTALL.md"
-            git push
-          fi
-
-      - name: Skip - version already released
-        if: steps.check.outputs.exists == 'true'
-        run: |
-          echo "Release v${{ steps.version.outputs.version }} already exists - bump manifest.json's 'version' (and SKILL.md metadata.version) to publish a new one."
+            --generate-notes \
+            --notes "Automated release v${{ steps.version.outputs.version }}. Install via Cowork > Customize > Plugins > Add plugin."

@@ -56,13 +56,17 @@ Cowork will update the existing plugin in place rather than installing a second 
 To ship a change to this plugin:
 
 1. Make your changes under `skills/csm-advisor/`.
-2. Bump `version` in `manifest.json` and the `metadata.version` field in `SKILL.md`.
-3. Push to `main`. The release workflow ([.github/workflows/release.yml](.github/workflows/release.yml))
-   detects the version bump, builds the ZIP, publishes it as a new GitHub Release tagged
-   `v<version>`, and updates the "Latest published version" line above automatically - the download
-   link always serves the newest release. (You can also trigger the workflow manually from the
-   **Actions** tab.)
+2. Push to `main`. Every push triggers the release workflow
+   ([.github/workflows/release.yml](.github/workflows/release.yml)), which automatically
+   increments the patch version (e.g. `1.1.3` -> `1.1.4`), updates `version` in `manifest.json` and
+   `SKILL.md`, builds the ZIP, publishes it as a new GitHub Release tagged `v<version>`, and updates
+   the "Latest published version" line above - the download link always serves the newest release.
+   (You can also trigger the workflow manually from the **Actions** tab.)
+
+You don't need to edit the version by hand. To start a new major/minor line, set `version` in
+`manifest.json` to e.g. `1.2.0` (with no existing `v1.2.0` tag) and push; later pushes continue from
+there. Run `git pull` after a push to get the bot's version-bump commit.
 
 Keep the same `id` (GUID) in `manifest.json` across updates so Cowork treats it as an update to the
 existing plugin rather than a new installation. The release workflow never overwrites or replaces an
-already-published version - it only publishes a new release when the version actually changes.
+already-published version.
