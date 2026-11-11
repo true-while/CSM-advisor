@@ -10,12 +10,12 @@ description: >-
   analyze files or meeting recaps, find skilling signals, pick Learn modules, or build skilling
   paths. Do NOT use for a separate summary per file, or to author new decks, documents, or
   workbooks (use the built-in docx/pptx/xlsx skills).
-metadata: {version: "1.1.5", cowork-category: "productivity", cowork-icon: "BookOpen"}
+metadata: {version: "1.1.6", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
 
-- **Current version:** `1.1.5`
+- **Current version:** `1.1.6`
 - **Stage 1 - supported formats:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
 - **Stage 1 - Teams meeting recaps:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
 - **Stage 2 - Signals Summary template:** [references/SIGNALS-SUMMARY-TEMPLATE.md](references/SIGNALS-SUMMARY-TEMPLATE.md)

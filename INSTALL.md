@@ -19,7 +19,7 @@ need to build or unzip anything yourself:
 [**Download CSM Advisor**](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
 
 <!-- latest-version:start -->
-Latest published version: **v1.1.5** (released 2026-11-11) - [release notes](https://github.com/true-while/CSM-advisor/releases/tag/v1.1.5)
+Latest published version: **v1.1.6** (released 2026-11-11) - [release notes](https://github.com/true-while/CSM-advisor/releases/tag/v1.1.6)
 <!-- latest-version:end -->
 
 Keep the downloaded `CSM-advisor.zip` file intact - don't unzip it or edit its contents.
