@@ -13,11 +13,13 @@ heading below is still used as-is.
 
 Generated: <date>
 Files analyzed: <count> (<formats present, e.g. "2 Word, 1 PDF, 3 PowerPoint, 1 Excel">)
+Teams meeting recaps included: <count, or omit this line if none were requested>
 
 ## Sources
 - <file name 1> (.docx) - <one-line description>
 - <file name 2> (.pdf) - <one-line description>
-- ... one line per analyzed file
+- <meeting title> (Teams recap, <date>) - <one-line description>
+- ... one line per analyzed file or meeting recap
 
 ## Executive Overview
 <3-6 sentences describing, across ALL files together, what this material covers and why it matters.>
@@ -32,6 +34,10 @@ Files analyzed: <count> (<formats present, e.g. "2 Word, 1 PDF, 3 PowerPoint, 1 
 - <file name 2>: <2-4 bullet highlights specific to this file>
 - ... (short - this is not a second full summary per file)
 
+## Decisions and Action Items from Meetings
+<Include only if Teams recaps were analyzed and contained any.>
+- <Decision or action item> - <owner if known> (<meeting title, date>)
+
 ## Gaps, Overlaps, or Contradictions
 - <Note any topic covered by only one file, duplicated across files, or inconsistent between files>
 
@@ -42,6 +48,7 @@ Files analyzed: <count> (<formats present, e.g. "2 Word, 1 PDF, 3 PowerPoint, 1 
 
 ## Unsupported or Unreadable Files
 - <file name> - <reason, e.g. "scanned PDF with no text layer", "unsupported extension">
+- <meeting title> (Teams recap) - <reason, e.g. "no recap generated", "access denied">
 ```
 
 Keep the "Per-File Highlights" section short - it exists so readers can trace themes back to a
