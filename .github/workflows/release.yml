@@ -4,7 +4,9 @@ name: Release Cowork Plugin
 # publishes it as a GitHub Release tagged v<version>. The version is auto-incremented (patch)
 # from the existing release tags; to start a new major/minor line, set e.g. "1.2.0" in
 # manifest.json. The bumped manifest.json, SKILL.md and INSTALL.md are committed back to main
-# (commits pushed with GITHUB_TOKEN do not re-trigger this workflow). Existing releases are never
+# (commits pushed with GITHUB_TOKEN do not re-trigger this workflow). A slim copy of the Microsoft
+# Learn catalog is downloaded fresh into the skill folder for each build; it is bundled in the ZIP
+# but not committed. Existing releases are never
 # overwritten, and the "latest" release exposes a stable download link:
 #   https://github.com/<owner>/<repo>/releases/latest/download/CSM-advisor.zip
 
@@ -53,6 +55,9 @@ jobs:
             git pull --rebase origin main
             git push origin main
           fi
+
+      - name: Download and slim Microsoft Learn catalog
+        run: python3 scripts/build_learn_catalog.py
 
       - name: Build plugin ZIP
         shell: pwsh

@@ -9,7 +9,7 @@ It works in four stages and pauses for your approval after each one:
 
 1. **Collect artifacts** - reads your files and optional Teams meeting recaps.
 2. **Detect signals and summarize** - extracts the customer outcome, adoption and usage signals, audiences, readiness, non-skilling blockers, and missing information into a *Signals Summary* Word document. Every signal records its source, date, and confidence (Confirmed, Probable, or Unconfirmed).
-3. **Select the path and hand-pick Microsoft Learn modules** - recommends Activate, Deepen, Protect, or Convert and Extend (alone or combined) from confirmed signals, plus a Learn shortlist for you to approve or edit.
+3. **Select the path and hand-pick Microsoft Learn modules** - recommends Activate, Deepen, Protect, or Convert and Extend (alone or combined) from confirmed signals, then matches every required training skill against a Microsoft Learn catalog bundled with the plugin (a snapshot refreshed with each release) and gives you a shortlist, with related instructor-led courses, to approve or edit.
 4. **Build the skilling plan** - gives you a *Skilling Paths proposal* Word document: an executive summary and a full internal MTT review by audience, with a measurement plan and a 60-to-90-day review.
 
 The result is always a **proposal** for MTT and account-stakeholder validation - never an approved plan.
@@ -75,13 +75,21 @@ To ship a change to this plugin:
 2. Push to `main`. Every push triggers the release workflow
    ([.github/workflows/release.yml](.github/workflows/release.yml)), which automatically
    increments the patch version (e.g. `1.1.3` -> `1.1.4`), updates `version` in `manifest.json` and
-   `SKILL.md`, builds the ZIP, publishes it as a new GitHub Release tagged `v<version>`, and updates
+   `SKILL.md`, downloads a fresh Microsoft Learn catalog into the skill
+   (`scripts/build_learn_catalog.py` writes `skills/csm-advisor/ms-learn-catalog.json`, bundled in
+   the ZIP but not committed), builds the ZIP, publishes it as a new GitHub Release tagged
+   `v<version>`, and updates
    the "Latest published version" line above - the download link always serves the newest release.
    (You can also trigger the workflow manually from the **Actions** tab.)
 
 You don't need to edit the version by hand. To start a new major/minor line, set `version` in
 `manifest.json` to e.g. `1.2.0` (with no existing `v1.2.0` tag) and push; later pushes continue from
 there. Run `git pull` after a push to get the bot's version-bump commit.
+
+To package locally, run `python scripts/build_learn_catalog.py` first, then `./scripts/package.ps1`.
+The catalog is a snapshot of the public Learn catalog API: it is refreshed only when a release is
+built, and the build fails rather than shipping an empty or oversized file (Cowork limits each
+companion file to 5 MB).
 
 Keep the same `id` (GUID) in `manifest.json` across updates so Cowork treats it as an update to the
 existing plugin rather than a new installation. The release workflow never overwrites or replaces an

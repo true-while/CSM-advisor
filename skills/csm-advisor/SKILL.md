@@ -20,6 +20,8 @@ metadata: {version: "1.1.7", cowork-category: "productivity", cowork-icon: "Book
 - **Stage 2 - Signals Summary template:** [references/SIGNALS-SUMMARY-TEMPLATE.md](references/SIGNALS-SUMMARY-TEMPLATE.md)
 - **Stage 3 - path selection rules:** [references/PATH-SELECTION.md](references/PATH-SELECTION.md)
 - **Stage 3 - Microsoft Learn selection:** [references/LEARN-MODULES.md](references/LEARN-MODULES.md)
+- **Stage 3 - bundled Learn catalog (snapshot):** `ms-learn-catalog.json`, searched only through
+  `scripts/search_catalog.py` (never load the whole file into context)
 - **Stage 4 - Skilling Paths proposal template:** [references/SKILLING-PATH-TEMPLATE.md](references/SKILLING-PATH-TEMPLATE.md)
 
 Resolve these references by their installed, host-provided location. Do not assume a filesystem
@@ -140,12 +142,16 @@ Using the approved Signals Summary:
    from Confirmed signals only; identify a primary path and any supporting paths and whether they run
    sequentially, in parallel, or by audience. Do not force a recommendation when readiness or
    blocker signals say skilling is not the primary intervention.
-2. Hand-pick real Microsoft Learn modules per
-   [references/LEARN-MODULES.md](references/LEARN-MODULES.md). Never invent modules or links; if Learn
-   cannot be reached, ask the user to supply modules.
+2. Derive the **required training skills** from the approved Stage 2 Signals Summary (skill gaps,
+   audiences, priority workflows, selected path focus). Look up every skill in the bundled Learn
+   catalog with `scripts/search_catalog.py` and analyze the matches per
+   [references/LEARN-MODULES.md](references/LEARN-MODULES.md): go over the whole skill set, choose the
+   best modules and learning paths for each, and note the related instructor-led course when the
+   catalog links one. Never invent modules or links. Use live Learn search only when the catalog file
+   is missing or has no match; if Learn cannot be reached, ask the user to supply modules.
 3. Present, in chat, the recommended path(s) with the confirmed signals behind each, the Learn
-   shortlist table, open gaps, assumed prerequisite skills per audience, and items needing MTT
-   validation.
+   shortlist table (with the catalog snapshot date), a skill-coverage summary, open gaps, assumed
+   prerequisite skills per audience, and items needing MTT validation.
 
 The user approves or edits the paths and list; re-present after edits. **Stage 3 deliverable:** a
 chat checkpoint, not a document. Ask for approval to continue to Stage 4.

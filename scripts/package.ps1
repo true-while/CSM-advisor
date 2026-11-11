@@ -21,6 +21,12 @@ foreach ($item in $itemsToPackage) {
     Copy-Item -Path $sourcePath -Destination $stagingDir -Recurse
 }
 
+# The Learn catalog is generated, not committed. Release builds create it first; warn if it is missing.
+$catalog = Join-Path $stagingDir "skills\csm-advisor\ms-learn-catalog.json"
+if (-not (Test-Path $catalog)) {
+    Write-Warning "ms-learn-catalog.json not found - run 'python scripts/build_learn_catalog.py' first to bundle it."
+}
+
 if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
 Compress-Archive -Path (Join-Path $stagingDir "*") -DestinationPath $zipPath
 Remove-Item -Recurse -Force $stagingDir
