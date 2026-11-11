@@ -9,12 +9,12 @@ description: >-
   "build a learning path from these files", "one summary of everything in this folder", or to
   "include my Teams meeting recaps". Do NOT use when the user wants a separate summary per file,
   or to create new decks, documents, or workbooks (use the built-in docx/pptx/xlsx skills).
-metadata: {version: "1.1.4", cowork-category: "productivity", cowork-icon: "BookOpen"}
+metadata: {version: "1.1.5", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
 
-- **Current version:** `1.1.4`
+- **Current version:** `1.1.5`
 - **Supported formats reference:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
 - **Output template reference:** [references/SUMMARY-TEMPLATE.md](references/SUMMARY-TEMPLATE.md)
 - **Teams meeting recaps reference:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
