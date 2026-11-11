@@ -12,7 +12,7 @@ need to build or unzip anything yourself:
 [**Download Learn Path Adviser**](https://github.com/true-while/Learn-Path-Adviser/releases/latest/download/learn-path-adviser.zip)
 
 <!-- latest-version:start -->
-Latest published version: **v1.1.0** (released 2026-11-11) - [release notes](https://github.com/true-while/Learn-Path-Adviser/releases/tag/v1.1.0)
+Latest published version: **v1.1.1** (released 2026-11-11) - [release notes](https://github.com/true-while/Learn-Path-Adviser/releases/tag/v1.1.1)
 <!-- latest-version:end -->
 
 Keep the downloaded `learn-path-adviser.zip` file intact - don't unzip it or edit its contents.
