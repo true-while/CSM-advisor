@@ -1,6 +1,6 @@
-# Installing Learn Path Adviser in Cowork
+# Installing CSM Advisor in Cowork
 
-**Learn Path Adviser** reads your Word, PDF, text, PowerPoint, and Excel files and gives you back
+**CSM Advisor** reads your Word, PDF, text, PowerPoint, and Excel files and gives you back
 one combined summary plus a suggested learning path. No technical setup is needed - just download
 the plugin and add it in Cowork.
 
@@ -9,7 +9,7 @@ the plugin and add it in Cowork.
 Download the plugin ZIP using the link below. It always points to the newest version - you don't
 need to build or unzip anything yourself:
 
-[**Download Learn Path Adviser**](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
+[**Download CSM Advisor**](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
 
 <!-- latest-version:start -->
 Latest published version: **v1.1.2** (released 2026-11-11) - [release notes](https://github.com/true-while/CSM-advisor/releases/tag/v1.1.2)
@@ -26,7 +26,7 @@ Keep the downloaded `CSM-advisor.zip` file intact - don't unzip it or edit its c
 ![Add plugin](addplugin.png)
 
 1. Follow the on-screen installation and consent steps.
-2. Confirm **Learn Path Adviser** appears in your installed plugins list.
+2. Confirm **CSM Advisor** appears in your installed plugins list.
 
 
 
@@ -37,7 +37,7 @@ Start a new Cowork conversation and paste in the prompt below (attach 2 or more 
 mix of Word, PDF, text, PowerPoint, and Excel):
 
 ```text
-Summarize these files into one combined summary using Learn Path Adviser: <attach/select 2+ files
+Summarize these files into one combined summary using CSM Advisor: <attach/select 2+ files
 in Word, PDF, text, PowerPoint, and/or Excel format>.
 ```
 
@@ -55,7 +55,7 @@ Cowork will update the existing plugin in place rather than installing a second 
 
 To ship a change to this plugin:
 
-1. Make your changes under `skills/CSM-advisor/`.
+1. Make your changes under `skills/csm-advisor/`.
 2. Bump `version` in `manifest.json` and the `metadata.version` field in `SKILL.md`.
 3. Push to `main`. The release workflow ([.github/workflows/release.yml](.github/workflows/release.yml))
    detects the version bump, builds the ZIP, publishes it as a new GitHub Release tagged

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Packages the Learn Path Adviser plugin into dist/CSM-advisor.zip for Cowork install/update.
+    Packages the CSM Advisor plugin into dist/CSM-advisor.zip for Cowork install/update.
 #>
 $ErrorActionPreference = "Stop"
 

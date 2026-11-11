@@ -1,4 +1,4 @@
-# Learn Path Adviser
+# CSM Advisor
 
 A plugin for Microsoft Copilot Cowork that analyzes your files and produces **one combined summary** with a suggested learning path.
 

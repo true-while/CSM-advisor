@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Learn Path Adviser - Install for Cowork</title>
-<meta name="description" content="Install and update the Learn Path Adviser plugin for Microsoft Copilot Cowork.">
+<title>CSM Advisor - Install for Cowork</title>
+<meta name="description" content="Install and update the CSM Advisor plugin for Microsoft Copilot Cowork.">
 <link rel="icon" href="assets/logo.png">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,7 +13,7 @@
   <div class="container nav">
     <a class="brand" href="#top">
       <img src="assets/logo.png" alt="" width="28" height="28">
-      Learn Path Adviser
+      CSM Advisor
     </a>
     <nav>
       <a href="#overview">Overview</a>
@@ -27,7 +27,7 @@
 
 <main id="top">
   <section class="hero container">
-    <h1>Learn Path Adviser</h1>
+    <h1>CSM Advisor</h1>
     <p class="tagline">
       One combined summary across Word, PDF, text, PowerPoint, and Excel files -
       a plugin for Microsoft Copilot Cowork.
@@ -44,14 +44,14 @@
   <section id="overview" class="container">
     <h2>Overview</h2>
     <p>
-      Point Learn Path Adviser at a mixed batch of files - <code>.docx</code>, <code>.pdf</code>,
+      Point CSM Advisor at a mixed batch of files - <code>.docx</code>, <code>.pdf</code>,
       <code>.txt</code>, <code>.pptx</code>, <code>.xlsx</code>/<code>.xls</code> - and it reads all
       of them and returns a single consolidated summary: cross-file themes, per-file highlights,
       gaps/overlaps, and a suggested learning path. It never produces a separate summary per file.
     </p>
     <figure>
-      <img src="assets/screenshots/plugins-list.png" alt="Cowork installed plugins list showing Learn Path Adviser">
-      <figcaption>Cowork &gt; Customize &gt; Plugins, with Learn Path Adviser installed.</figcaption>
+      <img src="assets/screenshots/plugins-list.png" alt="Cowork installed plugins list showing CSM Advisor">
+      <figcaption>Cowork &gt; Customize &gt; Plugins, with CSM Advisor installed.</figcaption>
     </figure>
   </section>
 
@@ -78,7 +78,7 @@
         </figure>
       </li>
       <li>Follow the on-screen installation and consent steps.</li>
-      <li>Confirm <strong>Learn Path Adviser</strong> appears in the installed plugins list.</li>
+      <li>Confirm <strong>CSM Advisor</strong> appears in the installed plugins list.</li>
     </ol>
     <p class="note">
       Tenant policy must permit plugin installation. If installation is blocked, contact your
@@ -90,7 +90,7 @@
     <h2>Verify</h2>
     <p>Start a new Cowork conversation and try the prompt below:</p>
     <div class="code-block">
-      <pre><code>Summarize these files into one combined summary using Learn Path Adviser: &lt;attach/select 2+ files
+      <pre><code>Summarize these files into one combined summary using CSM Advisor: &lt;attach/select 2+ files
 in Word, PDF, text, PowerPoint, and/or Excel format&gt;.</code></pre>
       <button class="copy-btn" type="button">Copy</button>
     </div>
@@ -100,14 +100,14 @@ in Word, PDF, text, PowerPoint, and/or Excel format&gt;.</code></pre>
     </figure>
     <p>
       Confirm the response follows the structure in
-      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/CSM-advisor/references/SUMMARY-TEMPLATE.md">SUMMARY-TEMPLATE.md</a>.
+      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SUMMARY-TEMPLATE.md">SUMMARY-TEMPLATE.md</a>.
     </p>
   </section>
 
   <section id="update" class="container">
     <h2>Update</h2>
     <ol class="steps">
-      <li>Make changes under <code>skills/CSM-advisor/</code>.</li>
+      <li>Make changes under <code>skills/csm-advisor/</code>.</li>
       <li>
         Bump <code>version</code> in <code>manifest.json</code> and <code>metadata.version</code> in
         <code>SKILL.md</code>.
@@ -120,7 +120,7 @@ in Word, PDF, text, PowerPoint, and/or Excel format&gt;.</code></pre>
         </div>
       </li>
       <li>
-        In Cowork, open <strong>Customize &gt; Plugins</strong>, select Learn Path Adviser, and
+        In Cowork, open <strong>Customize &gt; Plugins</strong>, select CSM Advisor, and
         upload the new ZIP to update it in place.
       </li>
     </ol>

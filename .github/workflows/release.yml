@@ -61,7 +61,7 @@ jobs:
           gh release create "v${{ steps.version.outputs.version }}" \
             dist/CSM-advisor.zip \
             --repo "${{ github.repository }}" \
-            --title "Learn Path Adviser v${{ steps.version.outputs.version }}" \
+            --title "CSM Advisor v${{ steps.version.outputs.version }}" \
             --notes "Automated release built from manifest.json version ${{ steps.version.outputs.version }}. Install via Cowork > Customize > Plugins > Add plugin."
 
       - name: Update INSTALL.md with latest version
