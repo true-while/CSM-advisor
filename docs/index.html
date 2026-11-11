@@ -46,8 +46,8 @@
     <p>
       Point CSM Advisor at a customer's materials - <code>.docx</code>, <code>.pdf</code>,
       <code>.txt</code>, <code>.pptx</code>, <code>.xlsx</code>/<code>.xls</code> files, plus emails,
-      usage reports, and notes - and optionally your Teams meeting recaps. It works in four stages
-      and pauses for your approval after each:
+      usage reports, and notes - and optionally your Teams meeting recaps. It runs four stages in
+      one go - it does not stop to ask you questions - and logs debug details at every step:
     </p>
     <ol>
       <li><strong>Collect artifacts</strong> - reads the files and recaps.</li>
@@ -57,9 +57,10 @@
         confidence (Confirmed, Probable, Unconfirmed), in a <em>Signals Summary</em> Word document.
       </li>
       <li>
-        <strong>Select the path and hand-pick Microsoft Learn modules</strong> - Activate, Deepen,
-        Protect, or Convert and Extend (alone or combined) from confirmed signals, plus a shortlist
-        you approve or edit.
+        <strong>Select the path and map required skills</strong> - Activate, Deepen, Protect, or
+        Convert and Extend (alone or combined) from confirmed signals, then each required skill is
+        mapped to Microsoft Learn modules and learning paths from a catalog bundled with the plugin,
+        with the catalog links, in a separate <em>Skills Map</em> Word document.
       </li>
       <li>
         <strong>Build the skilling plan</strong> - a <em>Skilling Paths proposal</em> Word document
@@ -68,7 +69,8 @@
       </li>
     </ol>
     <p class="note">
-      The result is always a proposal for MTT and account-stakeholder validation, never an
+      Anything missing is listed as missing information or an assumption instead of being asked
+      about. The result is always a proposal for MTT and account-stakeholder validation, never an
       approved plan.
     </p>
     <figure>
@@ -119,12 +121,13 @@ Include my Teams meeting recaps for &lt;customer&gt; from the last 2 weeks.</cod
     </div>
     <figure>
       <img src="assets/screenshots/combined-summary-output.png" alt="CSM Advisor reply in chat">
-      <figcaption>Expected result: a short reply after each stage, with links to the Word documents for Stage 2 and Stage 4.</figcaption>
+      <figcaption>Expected result: a short message per stage with a debug block, and links to three Word documents (Signals Summary, Skills Map, Skilling Paths proposal).</figcaption>
     </figure>
     <p>
-      Reply "approve" after each stage to continue, or ask for changes. Open the linked Word
-      documents and confirm they follow the structure in
-      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SIGNALS-SUMMARY-TEMPLATE.md">SIGNALS-SUMMARY-TEMPLATE.md</a>
+      The run needs no replies from you. Open the linked Word documents and confirm they follow the
+      structure in
+      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SIGNALS-SUMMARY-TEMPLATE.md">SIGNALS-SUMMARY-TEMPLATE.md</a>,
+      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SKILLS-MAP-TEMPLATE.md">SKILLS-MAP-TEMPLATE.md</a>,
       and
       <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SKILLING-PATH-TEMPLATE.md">SKILLING-PATH-TEMPLATE.md</a>.
     </p>

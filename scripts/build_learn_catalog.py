@@ -14,10 +14,10 @@ import time
 import urllib.request
 from pathlib import Path
 
-URL = "https://learn.microsoft.com/api/catalog/?locale=en-us&type=modules,learningPaths,courses"
+URL = "https://learn.microsoft.com/api/catalog/?locale=en-us&type=modules,learningPaths"
 OUT = Path(__file__).resolve().parent.parent / "skills" / "csm-advisor" / "ms-learn-catalog.json"
 MAX_BYTES = 4_500_000
-MIN_MODULES, MIN_PATHS, MIN_COURSES = 1000, 100, 50
+MIN_MODULES, MIN_PATHS = 1000, 100
 
 
 def fetch() -> dict:
@@ -57,21 +57,14 @@ def build(raw: dict, summary_len: int = 200) -> dict:
          "modules": p.get("modules", [])}
         for p in raw.get("learningPaths", [])
     ]
-    courses = [
-        {"uid": c["uid"], "code": c.get("course_number"), "title": c["title"], "url": bare(c["url"]),
-         "levels": c.get("levels", []), "roles": c.get("roles", []), "products": c.get("products", []),
-         "hours": c.get("duration_in_hours"), "summary": clean(c.get("summary"), summary_len),
-         "paths": [s["uid"] for s in c.get("study_guide", []) if s.get("type") == "learningPath"]}
-        for c in raw.get("courses", [])
-    ]
-    if len(modules) < MIN_MODULES or len(paths) < MIN_PATHS or len(courses) < MIN_COURSES:
+    if len(modules) < MIN_MODULES or len(paths) < MIN_PATHS:
         raise SystemExit(
-            f"catalog looks incomplete: {len(modules)} modules, {len(paths)} paths, {len(courses)} courses")
+            f"catalog looks incomplete: {len(modules)} modules, {len(paths)} paths")
     return {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "source": "https://learn.microsoft.com/api/catalog/",
-        "counts": {"modules": len(modules), "paths": len(paths), "courses": len(courses)},
-        "modules": modules, "paths": paths, "courses": courses,
+        "counts": {"modules": len(modules), "paths": len(paths)},
+        "modules": modules, "paths": paths,
     }
 
 

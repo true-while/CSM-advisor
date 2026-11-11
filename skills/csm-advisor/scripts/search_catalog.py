@@ -1,12 +1,14 @@
-"""Search the bundled Microsoft Learn catalog (ms-learn-catalog.json).
+"""Search the bundled Microsoft Learn catalog (ms-learn-catalog.json) for modules and learning paths.
 
 Usage:
   python scripts/search_catalog.py "copilot readiness" "prompt engineering" [--product microsoft-365-copilot]
-         [--role administrator] [--level beginner] [--type module|path|course|all] [--limit 8]
+         [--role administrator] [--level beginner] [--type module|path|all] [--limit 8]
   python scripts/search_catalog.py --facets      # list the product / role / level / subject values in the catalog
 
-Prints JSON only. Each result keeps the catalog link, level, duration, and (for modules and paths) the
-related learning paths and instructor-led courses. The catalog is a snapshot: report generated_at.
+Prints JSON only. Every result carries the catalog link, level and duration; paths list their modules and
+modules list the learning paths they belong to. The "debug" object records what was searched (catalog
+snapshot date and size, filters, query tokens, candidate counts, top scores) so each step can be logged.
+The catalog is a snapshot: always report generated_at.
 """
 import argparse
 import json
@@ -57,6 +59,11 @@ def score(item, qtokens, idf):
     return s * (hit / max(1, len(set(qtokens)))) ** 2 if hit else 0.0
 
 
+def strength(s):
+    """Heuristic label only: still check the title and summary against the skill before using a match."""
+    return "strong" if s >= 15 else "possible" if s >= 6 else "weak"
+
+
 def matches_filters(item, args):
     for field, wanted in (("products", args.product), ("roles", args.role), ("levels", args.level)):
         if wanted and not set(wanted) & set(item.get(field, [])):
@@ -71,7 +78,7 @@ def main():
     ap.add_argument("--product", action="append")
     ap.add_argument("--role", action="append")
     ap.add_argument("--level", action="append")
-    ap.add_argument("--type", default="all", choices=["module", "path", "course", "all"])
+    ap.add_argument("--type", default="all", choices=["module", "path", "all"])
     ap.add_argument("--limit", type=int, default=8)
     ap.add_argument("--facets", action="store_true")
     args = ap.parse_args()
@@ -83,66 +90,57 @@ def main():
     if args.facets:
         out = {"generated_at": cat["generated_at"], "counts": cat["counts"]}
         for field in ("products", "roles", "levels", "subjects"):
-            c = Counter(v for kind in ("modules", "paths", "courses") for i in cat[kind] for v in i.get(field, []))
+            c = Counter(v for kind in ("modules", "paths") for i in cat[kind] for v in i.get(field, []))
             out[field] = [k for k, _ in c.most_common(60)]
         print(json.dumps(out, indent=1))
         return
 
     modules = {m["uid"]: m for m in cat["modules"]}
-    paths = {p["uid"]: p for p in cat["paths"]}
-    courses_by_path = {}
-    for c in cat["courses"]:
-        for p in c["paths"]:
-            courses_by_path.setdefault(p, []).append(c)
     paths_by_module = {}
     for p in cat["paths"]:
         for m in p["modules"]:
             paths_by_module.setdefault(m, []).append(p)
 
-    def course_ref(c):
-        return {"code": c["code"], "title": c["title"], "url": c["url"], "hours": c["hours"]}
-
     def view(kind, item):
-        if kind == "course":
-            return {"type": "course", "code": item["code"], "title": item["title"], "url": item["url"],
-                    "hours": item["hours"], "levels": item["levels"], "roles": item["roles"],
-                    "products": item["products"], "summary": item["summary"],
-                    "paths": [{"title": paths[p]["title"], "url": paths[p]["url"]} for p in item["paths"] if p in paths]}
         v = {"type": kind, "title": item["title"], "url": item["url"], "levels": item.get("levels"),
              "roles": item.get("roles"), "products": item.get("products"),
              "minutes": item.get("minutes"), "summary": item.get("summary")}
         if kind == "path":
             v["modules"] = [{"title": modules[m]["title"], "url": modules[m]["url"]} for m in item["modules"] if m in modules]
-            v["courses"] = [course_ref(c) for c in courses_by_path.get(item["uid"], [])]
         else:
-            parents = paths_by_module.get(item["uid"], [])
-            v["in_paths"] = [{"title": p["title"], "url": p["url"]} for p in parents[:3]]
-            seen = {}
-            for p in parents:
-                for c in courses_by_path.get(p["uid"], []):
-                    seen[c["uid"]] = c
-            v["courses"] = [course_ref(c) for c in list(seen.values())[:3]]
+            v["in_paths"] = [{"title": p["title"], "url": p["url"]} for p in paths_by_module.get(item["uid"], [])[:3]]
         return v
 
-    pools = {"module": cat["modules"], "path": cat["paths"], "course": cat["courses"]}
+    pools = {"module": cat["modules"], "path": cat["paths"]}
     idf = build_idf([i for pool in pools.values() for i in pool])
     kinds = list(pools) if args.type == "all" else [args.type]
-    results = []
+    results, debug_queries = [], []
     for q in args.queries:
         qt = tokens(q)
-        scored = []
+        scored, considered = [], 0
         for kind in kinds:
             for item in pools[kind]:
                 if not matches_filters(item, args):
                     continue
+                considered += 1
                 s = score(item, qt, idf)
                 if s > 0:
                     scored.append((s + (0.5 if kind == "path" else 0), kind, item))
         scored.sort(key=lambda x: -x[0])
-        results.append({"query": q, "matches": [dict(view(k, i), score=round(s, 1)) for s, k, i in scored[: args.limit]]})
+        top = scored[: args.limit]
+        results.append({"query": q, "matches": [dict(view(k, i), score=round(s, 1), strength=strength(s)) for s, k, i in top]})
+        debug_queries.append({"query": q, "tokens": qt, "items_considered": considered, "items_matched": len(scored),
+                              "returned": len(top), "top_score": round(top[0][0], 1) if top else None,
+                              "strong_matches": sum(1 for s, _, _ in top if strength(s) == "strong")})
 
-    print(json.dumps({"generated_at": cat["generated_at"], "note": "Snapshot of Microsoft Learn; verify links before sending",
-                      "results": results}, indent=1, ensure_ascii=False))
+    print(json.dumps({
+        "generated_at": cat["generated_at"],
+        "note": "Snapshot of Microsoft Learn; links come from the catalog",
+        "debug": {"catalog_counts": cat["counts"],
+                  "filters": {"product": args.product, "role": args.role, "level": args.level,
+                              "type": args.type, "limit": args.limit},
+                  "queries": debug_queries},
+        "results": results}, indent=1, ensure_ascii=False))
 
 
 if __name__ == "__main__":

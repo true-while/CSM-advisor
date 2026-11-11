@@ -12,18 +12,17 @@ What to extract, the signal record fields, and the readiness and blocker rules a
 ## Chat reply (separate from the document)
 
 The detail goes ONLY into the Word document. In chat reply with 2-3 sentences (what was analyzed,
-the single most important finding, and a link to the document), state the stage status, then ask
-for approval:
+the single most important finding, and a link to the document) and the stage status, followed by the
+`Debug - Stage 1` and `Debug - Stage 2` blocks from [DEBUG-LOG.md](DEBUG-LOG.md). Do not ask for
+approval or more information - continue straight to Stage 3:
 
 > I analyzed 5 files and 3 Teams meeting recaps for <customer>. The customer outcome is <outcome>;
 > readiness is <Ready with conditions> and <N> items of information are still missing. Full details:
-> [Signals Summary](<link to the .docx>). Status: <status>. Approve to continue to path selection,
-> or tell me what to change or add.
+> [Signals Summary](<link to the .docx>). Status: <status>.
 
 Stage 2 status (one of): **Ready for path selection**, **More customer information required**,
 **Not ready for path selection** (customer outcome missing), **Non-skilling blocker identified**.
-When the status is not "Ready for path selection", say what is needed and do not continue to
-Stage 3 unless the user asks to.
+Whatever the status, state what is missing or what blocks, and continue to Stage 3.
 
 ## Document structure
 
@@ -54,9 +53,12 @@ what is missing.>
 (Mark "Not provided" for anything missing. If the outcome is missing: **Not ready for path selection**.)
 
 ## 2. Signal Inventory
-| Signal | Value or finding | Source | Source date | Confidence | Validation required |
-|--------|------------------|--------|-------------|------------|---------------------|
-| <signal> | <value> | <source> | <date or n/a> | Confirmed / Probable / Unconfirmed | Yes / No |
+| ID | Signal | Value or finding | Source | Source date | Confidence | Validation required |
+|----|--------|------------------|--------|-------------|------------|---------------------|
+| Sig-1 | <signal> | <value> | <source> | <date or n/a> | Confirmed / Probable / Unconfirmed | Yes / No |
+
+Give every signal a unique id (Sig-1, Sig-2, ...). The Skills Map and the Skilling Paths proposal cite
+signals by these ids.
 
 ### Adoption and usage
 - Licenses purchased / assigned / activated; active and inactive users:
@@ -104,6 +106,11 @@ For each audience group found in the sources:
 - <file name> - <reason, e.g. "scanned PDF with no text layer", "unsupported extension">
 - <meeting title> (Teams recap) - <reason, e.g. "no recap generated", "access denied">
 - Input types not supplied (from the list in SIGNAL-COLLECTION.md)
+
+## Appendix - Debug Log
+<Stage 1 - Collection log and Stage 2 - Signal detection log, as step tables per DEBUG-LOG.md:
+every source with its read result, the Teams recap scope and result, the outcome of Steps 1-5,
+counts by category and confidence, and the document creation result.>
 ```
 
 Keep "Per-Source Highlights" short - it exists so readers can trace signals to a source. The

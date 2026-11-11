@@ -1,79 +1,60 @@
-# Selecting Microsoft Learn Resources (Stage 3)
+# Mapping Required Skills to the Microsoft Learn Catalog (Stage 3)
 
-Goal: after the path(s) are chosen (see [PATH-SELECTION.md](PATH-SELECTION.md)), find the Microsoft
-Learn content that the required training skills detected in Stage 1-2 call for, and have the user
-approve it before the skilling plan is written. This stage produces a chat checkpoint, not a
-document.
+Goal: turn the skill gaps found in Stages 1-2 into a list of required training skills, and map each
+skill to Microsoft Learn modules or learning paths. The result goes into the Skills Map document
+(see [SKILLS-MAP-TEMPLATE.md](SKILLS-MAP-TEMPLATE.md)). Nothing here waits for user approval.
+
+Instructor-led classes and courses are out of scope for this version: do not search for them, map
+to them, or list them.
 
 ## Source order
 
 1. **Bundled Learn catalog (default).** `ms-learn-catalog.json` in the skill folder is a snapshot of
-   the public Microsoft Learn catalog (modules, learning paths, instructor-led courses), refreshed
-   at every plugin release. Search it only with `scripts/search_catalog.py`; do not open the JSON
-   file directly - it is several MB. It records `generated_at`: state that date when presenting results.
+   the public Microsoft Learn catalog (modules and learning paths), rebuilt at every plugin release.
+   Search it only with `scripts/search_catalog.py`; do not open the JSON file directly - it is several
+   MB. It records `generated_at`: state that date in the Skills Map.
 2. **Live Microsoft Learn search**, only if the catalog file is missing, the script cannot run, or a
-   skill has no match. Use whatever Learn, documentation, or web-search tool Cowork provides.
-3. **Ask the user** for modules or links if neither works. Never fall back to guessing.
+   skill has no usable match. Use whatever Learn, documentation, or web-search tool Cowork provides
+   and log that the fallback was used.
+3. **No source works:** list the skill under Open Gaps with the reason and continue. Never guess.
 
 ## Rules
 
-- **Never invent** module titles, learning paths, links, course codes, availability, or durations.
-  Use only values returned by the catalog script or a live Learn search. Leave level and duration
-  blank if they are not shown.
-- **Verify fit:** each pick's title, summary, level, and roles must match the skill need and the
-  intended audience. Catalog filters are loose, so reject unrelated matches (for example a product
-  with a similar name) instead of padding the list.
-- Prefer a short, well-matched list over an exhaustive one. Each module must trace to a confirmed
-  signal and to a selected path. Prefer learning paths for broad needs and single modules for narrow
-  ones.
+- **Never invent** module titles, learning paths, links, levels, or durations. Use only values
+  returned by the catalog script or a live Learn search, and copy links exactly.
+- **Verify fit:** a match's title, summary, level, and roles must fit the skill and the audience.
+  Catalog filters and the script's `strength` label are heuristics, so reject look-alikes and
+  anything `weak` unless the title clearly fits.
+- Prefer a short, well-matched list over an exhaustive one: at most 3 catalog items per skill.
 - Skip content the signals show an audience already completed.
-- The catalog is a snapshot; links can change. Tell the user the snapshot date and that the
-  shortlist should be spot-checked before it goes to the customer.
-- Do not promise instructor-led course availability, dates, delivery capacity, or cloud support. A
-  course shown in the catalog (code, title, hours) means the course exists on Microsoft Learn, not
-  that it can be delivered; list it as "requires MTT validation".
+- The catalog is a snapshot; links can change. State the snapshot date in the document.
 
 ## How to analyze the skill set
 
-1. **List the required training skills.** From the approved Stage 2 Signals Summary, extract each
-   skill gap, capability need, priority workflow, and selected-path focus, grouped by audience.
-   Phrase each as a short search phrase (for example "copilot readiness rollout", "build agents in
-   copilot studio", "prompt engineering for business users"). Check which products, roles, and levels
-   are available with `python scripts/search_catalog.py --facets`.
-2. **Search every skill**, in one call where possible:
+1. **Derive the required skills.** From the Stage 2 Signals Summary, extract each skill gap,
+   capability need, priority workflow, and selected-path focus, grouped by audience. Give each an
+   id (S1, S2, ...), a short name, why it matters to this customer, the audiences, the signal
+   evidence, a priority, and current -> target level when known.
+2. **Write search phrases.** One to three short phrases per skill, using the product and the skill
+   (for example "copilot readiness rollout", "build agents copilot studio", "prompt engineering
+   business users"). Check the available product, role, and level ids with
+   `python scripts/search_catalog.py --facets`.
+3. **Search every skill**, in one call where possible:
 
    ```text
-   python scripts/search_catalog.py "<skill 1>" "<skill 2>" --level beginner --level intermediate --limit 5
+   python scripts/search_catalog.py "<skill 1 phrase>" "<skill 2 phrase>" --level beginner --level intermediate --limit 5
    ```
 
-   Useful filters: `--product <id>`, `--role <id>`, `--level <id>`, `--type module|path|course`.
-   Use the product, role, and level ids shown by `--facets`; omit a filter if it removes good matches.
-   The result lists, for each match, its link, level, duration, the related learning paths and
-   modules, and any instructor-led course the catalog links to it.
-3. **Go over the whole skill set**, not one skill at a time:
-   - Choose the best match for each skill, and prefer a learning path when several of the skills map
-     to the modules of the same path.
-   - Merge duplicates: one module that serves several skills or audiences appears once.
+   Filters: `--product <id>`, `--role <id>`, `--level <id>`, `--type module|path`. Use the ids shown
+   by `--facets`; drop a filter if it removes good matches and note that in the log. The output lists
+   each match's title, link, level, minutes, the modules of a path or the paths of a module, a
+   `strength` label, and a `debug` object to copy into the log.
+4. **Go over the whole skill set**, not one skill at a time:
+   - Choose the best match for each skill; prefer a learning path when several of a skill's best
+     matches are modules of the same path.
+   - Merge duplicates: an item that serves several skills or audiences is listed once.
    - Match level to the audience's current skill level from the Signals Summary.
-   - Record coverage: which skills are fully covered, partly covered, or not covered.
-4. Capture title, link, level, duration, the signal it addresses, and why it fits. Note any skill with
-   no good match as an **open gap** instead of padding the list.
-
-## Shortlist format (chat)
-
-| # | Module / learning path | Link | Level | Duration | Skill / signal addressed | Related instructor-led course | Intended audiences |
-|---|------------------------|------|-------|----------|--------------------------|-------------------------------|--------------------|
-| 1 | <title> | <Learn URL> | <level or blank> | <minutes or blank> | <skill; signal; path> | <code and title, or "none in catalog"> | <Leaders / Champions / Advocates / End Users / ...> |
-
-Then add:
-
-- **Skill coverage summary:** each required skill with Covered / Partly covered / Not covered and the
-  module(s) that cover it.
-- **Catalog snapshot date** (`generated_at`) and a reminder to spot-check links.
-- **Open gaps:** skills with no matching Learn content.
-- **Assumed prerequisite skills per audience** (at least Leaders, Champions, Advocates, End Users),
-  inferred from the signals - state them as assumptions so the user can correct them.
-- **Instructor-led or other non-Learn items** that would need MTT validation.
-
-Finish with one question: approve the path(s) and list, or what to add, remove, or replace.
-Re-present after each edit. Only move to Stage 4 after approval.
+   - Record coverage per skill: Covered, Partly covered, or Not covered.
+5. Put any skill without a fitting match under **Open Gaps** with the phrases tried. Do not pad.
+6. Log every search and decision as described in [DEBUG-LOG.md](DEBUG-LOG.md), then write the Skills
+   Map document and continue to Stage 4.

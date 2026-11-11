@@ -11,7 +11,9 @@ Principles:
 - Everything produced is a **proposal** requiring confirmation by the customer, the account team,
   and the MTT. Never present it as approved.
 - Do not claim access to any communication or data that was not supplied or made available. Do not
-  invent missing values - ask for them or mark them as assumptions.
+  invent missing values: never stop to ask for them - list them under "Missing information" or mark
+  them as assumptions, and continue.
+- Log every step as described in [DEBUG-LOG.md](DEBUG-LOG.md).
 
 ## Inputs to analyze (Stage 1)
 
@@ -47,12 +49,12 @@ information" list.
 
 ## Step 1 - Identify the customer outcome
 
-Extract or request: stated business priority; desired customer outcome; priority workflows or
-scenarios; business deadline; success measure; metric owner; evidence location; named customer
-sponsor; named customer skilling champion.
+Extract: stated business priority; desired customer outcome; priority workflows or scenarios;
+business deadline; success measure; metric owner; evidence location; named customer sponsor; named
+customer skilling champion. Anything not found goes under "Missing information".
 
-If the customer outcome is missing, mark the recommendation **Not ready for path selection** and
-stop at the Stage 2 gate to ask for it.
+If the customer outcome is missing, mark the recommendation **Not ready for path selection**, record
+what is needed, and continue to the next stage without stopping.
 
 ## Step 2 - Collect adoption and usage signals
 
@@ -69,8 +71,8 @@ Classify the usage pattern as one of:
 - Repeatable workflow usage
 - Advanced usage involving agents or extended solutions
 
-If usage information is incomplete, do not estimate it. Ask for the missing data or mark it as an
-assumption requiring confirmation.
+If usage information is incomplete, do not estimate it. List the missing data under "Missing
+information" and mark any figure you had to assume as an assumption requiring confirmation.
 
 ## Step 3 - Identify audiences and capability gaps
 
@@ -95,7 +97,8 @@ Do not assume all audiences need the same learning activities.
 
 ## Step 4 - Check sponsorship and readiness
 
-Confirm: a customer sponsor is named; a customer skilling champion is named; the customer has agreed
+Record whether each of these is true (Yes / No / Unknown): a customer sponsor is named; a customer
+skilling champion is named; the customer has agreed
 on the intended outcome; relevant audiences can participate; time is available for practice and
 reinforcement; licensing and product access are available; required features are available in the
 customer's cloud; security and compliance requirements are understood; labs, demonstrations,
@@ -121,8 +124,9 @@ If the primary cause is not a skilling gap:
 4. Recommend routing the issue to the appropriate accountable team.
 5. Explain what must change before skilling should be reconsidered.
 
-Stop at the Stage 2 gate with status **Non-skilling blocker identified** unless the user asks to
-continue anyway.
+Set the status to **Non-skilling blocker identified** and continue: Stages 3 and 4 still run, but
+they state that skilling is not the primary intervention and carry the blocker and routing
+recommendation forward.
 
 ## Missing information and contradictions
 

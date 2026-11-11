@@ -15,7 +15,7 @@
   },
   "description": {
     "short": "Customer signals to an evidence-based, role-based skilling plan.",
-    "full": "CSM Advisor helps CSMs, account teams, MTTMs and MTTs turn customer files (Word, PDF, text, PowerPoint, Excel), emails, usage reports and optional Teams meeting recaps into an evidence-based skilling proposal. It works in four stages with your approval after each: collect artifacts, extract signals into a Signals Summary Word document, select an Activate, Deepen, Protect or Convert and Extend path and hand-pick Microsoft Learn modules, and build a Skilling Paths proposal Word document by audience for MTT review."
+    "full": "CSM Advisor helps CSMs, account teams, MTTMs and MTTs turn customer files (Word, PDF, text, PowerPoint, Excel), emails, usage reports and optional Teams meeting recaps into an evidence-based skilling proposal. It runs four stages in one go and logs debug details at every step: collect artifacts, extract signals into a Signals Summary Word document, select an Activate, Deepen, Protect or Convert and Extend path and map each required skill to Microsoft Learn catalog items in a Skills Map Word document, and build a Skilling Paths proposal Word document by audience for MTT review."
   },
   "icons": {
     "color": "color.png",

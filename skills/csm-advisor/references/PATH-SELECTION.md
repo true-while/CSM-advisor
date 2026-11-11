@@ -5,7 +5,8 @@ Signals Summary). Do not select a path from a single usage metric, and do not tr
 Deepen, Protect, and Convert and Extend as a mandatory maturity sequence.
 
 If the customer outcome is missing ("Not ready for path selection") or the primary cause is a
-non-skilling blocker, do not select a path - explain why and what must change first.
+non-skilling blocker, do not select a path: write "No path selected" with the reason and what must
+change first, then continue with the rest of Stage 3 and Stage 4 without stopping.
 
 ## Activate - first use
 
@@ -76,11 +77,15 @@ combination:
 - Explain the signal supporting each path.
 - Explain whether paths should run sequentially, in parallel, or for different audiences.
 
-## What to present in chat at Stage 3
+## What to record for Stage 3
 
-1. Recommended path(s): primary and supporting, with the confirmed signals behind each, and the
-   sequencing (sequential, parallel, or by audience).
-2. Signals that were only Probable or Unconfirmed and therefore did NOT drive a choice.
-3. The Microsoft Learn shortlist (see [LEARN-MODULES.md](LEARN-MODULES.md)).
+Record this in the "Selected Path(s)" section of the Skills Map
+([SKILLS-MAP-TEMPLATE.md](SKILLS-MAP-TEMPLATE.md)) and in the debug log:
 
-Use outcome-based language. Do not present the output as a list of unrelated courses.
+1. Recommended path(s): primary and supporting, with the confirmed signals behind each (by signal
+   reference), and the sequencing (sequential, parallel, or by audience).
+2. For each of the four paths that did NOT match, the reason (no confirmed signal, or only Probable
+   or Unconfirmed ones).
+3. Signals that were only Probable or Unconfirmed and therefore did NOT drive a choice.
+
+Use outcome-based language. Do not present the output as a list of unrelated items.

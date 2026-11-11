@@ -10,22 +10,24 @@ shares content.
   signed-in user**. This skill cannot grant itself access.
 - Read only meetings the user can already open (organizer, attendee, or shared recap). Never
   attempt to access other users' meetings or bypass permissions or sensitivity labels.
-- If no Teams/meeting tool is available, or access is denied, tell the user once and continue with
-  the remaining files.
+- If no Teams/meeting tool is available, or access is denied, log it, note it in the Signals Summary,
+  and continue with the remaining files.
 
 ## When to retrieve
 
-- Only when the user asks ("include my meeting recaps", "add last week's Teams meetings") or agrees
-  to an offer. Do not pull recaps silently.
-- Confirm scope when unclear: time range (default suggestion: last 14 days), specific meeting
-  names/series, or attendees. Keep the scope as narrow as the request allows.
+- Only when the user asked for recaps in the request (for example "include my meeting recaps" or "add
+  last week's Teams meetings"). Do not pull recaps silently, and do not ask whether to include them.
+- Scope: use the time range, meeting names, or attendees the user gave. If none were given, use the
+  last 14 days and the customer or scenario name from the request, and log that the default was used.
+  Keep the scope as narrow as the request allows.
 
 ## What to extract per meeting
 
 - Meeting title, date, and organizer.
 - Recap/AI notes: summary, key topics, decisions, and action items (with owners if listed).
-- Transcript excerpts only when the recap has no summary, or the user asks for detail.
-- Linked or shared files are NOT analyzed automatically; mention them and let the user attach them.
+- Transcript excerpts only when the recap has no summary.
+- Linked or shared files are NOT analyzed automatically; list them under "Missing information" as
+  files that could add evidence.
 
 ## How to represent them in the Signals Summary (Stage 2)
 
