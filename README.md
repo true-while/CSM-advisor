@@ -8,14 +8,14 @@ A plugin for Microsoft Copilot Cowork that analyzes your files and produces **on
 
 ## Install
 
-Step-by-step instructions: **https://true-while.github.io/Learn-Path-Adviser/**
+Step-by-step instructions: **https://true-while.github.io/CSM-advisor/**
 
 Direct download (always the latest version):
-[learn-path-adviser.zip](https://github.com/true-while/Learn-Path-Adviser/releases/latest/download/learn-path-adviser.zip)
+[learn-path-adviser.zip](https://github.com/true-while/CSM-advisor/releases/latest/download/learn-path-adviser.zip)
 
-All versions are listed on the [Releases page](https://github.com/true-while/Learn-Path-Adviser/releases).
+All versions are listed on the [Releases page](https://github.com/true-while/CSM-advisor/releases).
 
 ## Documentation
 
-- [Install guide (GitHub Pages)](https://true-while.github.io/Learn-Path-Adviser/)
+- [Install guide (GitHub Pages)](https://true-while.github.io/CSM-advisor/)
 - [INSTALL.md](INSTALL.md)
