@@ -1,8 +1,15 @@
 # Installing CSM Advisor in Cowork
 
-**CSM Advisor** reads your Word, PDF, text, PowerPoint, and Excel files and gives you back
-one combined summary plus a suggested learning path. No technical setup is needed - just download
-the plugin and add it in Cowork.
+**CSM Advisor** turns your Word, PDF, text, PowerPoint, and Excel files (and, if you ask, your
+Teams meeting recaps) into role-based Microsoft Learn skilling paths. No technical setup is needed -
+just download the plugin and add it in Cowork.
+
+It works in four stages and pauses for your approval after each one:
+
+1. **Collect artifacts** - reads your files and optional Teams meeting recaps.
+2. **Detect signals and summarize** - finds the skilling signals and gives you a *Signals Summary* Word document.
+3. **Hand-pick Microsoft Learn modules** - proposes a shortlist for you to approve or edit.
+4. **Build skilling paths** - gives you a *Skilling Paths proposal* Word document for Leaders, Champions, Advocates, and End Users, based on role and prerequisite skills.
 
 ## 1. Download
 
@@ -37,12 +44,15 @@ Start a new Cowork conversation and paste in the prompt below (attach 2 or more 
 mix of Word, PDF, text, PowerPoint, and Excel):
 
 ```text
-Summarize these files into one combined summary using CSM Advisor: <attach/select 2+ files
-in Word, PDF, text, PowerPoint, and/or Excel format>.
+Use CSM Advisor to find skilling signals in these files and build skilling paths:
+<attach/select 2+ files in Word, PDF, text, PowerPoint, and/or Excel format>.
+Include my Teams meeting recaps from the last 2 weeks.
 ```
 
-You should get back a short reply (2-3 sentences) with a link to one Word document that contains the
-detailed combined summary of all the files together, not a separate summary per file.
+CSM Advisor replies after each stage with a short message (2-3 sentences) and waits for you to say
+"approve" or request changes. You get a Word document after Stage 2 (Signals Summary) and after
+Stage 4 (Skilling Paths proposal); Stage 3 is a shortlist in chat. Say "run all stages without
+stopping" if you don't want the approval pauses.
 
 ## Updating to a newer version
 

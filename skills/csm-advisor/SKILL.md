@@ -1,132 +1,165 @@
 ---
 name: csm-advisor
 description: >-
-  Analyzes files in Word (.docx), PDF, text (.txt), PowerPoint (.pptx), and Excel (.xlsx/.xls)
-  formats, optionally plus the user's Microsoft Teams meeting recaps, and produces exactly ONE
-  consolidated summary of all sources combined, with cross-file themes, gaps, and a suggested
-  learning path. The detailed result is always saved as one Word document; the chat reply is only
-  2-3 sentences plus a link to that file. Use when the user asks to "summarize these documents", "analyze these files",
-  "build a learning path from these files", "one summary of everything in this folder", or to
-  "include my Teams meeting recaps". Do NOT use when the user wants a separate summary per file,
-  or to create new decks, documents, or workbooks (use the built-in docx/pptx/xlsx skills).
+  Four-stage workflow that turns a customer's or team's materials into role-based Microsoft Learn
+  skilling paths, pausing for approval after each stage. Stage 1 collects artifacts (Word, PDF,
+  text, PowerPoint, Excel files and, if asked, the user's Teams meeting recaps). Stage 2 detects
+  signals and writes one Signals Summary Word document. Stage 3 hand-picks required Microsoft Learn
+  modules for the user to approve. Stage 4 writes one Skilling Paths proposal Word document for
+  Leaders, Champions, Advocates, and End Users with prerequisite skills. Use when the user asks to
+  analyze files or meeting recaps, find skilling signals, pick Learn modules, or build skilling
+  paths. Do NOT use for a separate summary per file, or to author new decks, documents, or
+  workbooks (use the built-in docx/pptx/xlsx skills).
 metadata: {version: "1.1.5", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
 
 - **Current version:** `1.1.5`
-- **Supported formats reference:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
-- **Output template reference:** [references/SUMMARY-TEMPLATE.md](references/SUMMARY-TEMPLATE.md)
-- **Teams meeting recaps reference:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
+- **Stage 1 - supported formats:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
+- **Stage 1 - Teams meeting recaps:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
+- **Stage 2 - Signals Summary template:** [references/SIGNALS-SUMMARY-TEMPLATE.md](references/SIGNALS-SUMMARY-TEMPLATE.md)
+- **Stage 3 - Microsoft Learn module selection:** [references/LEARN-MODULES.md](references/LEARN-MODULES.md)
+- **Stage 4 - Skilling Path template and learner groups:** [references/SKILLING-PATH-TEMPLATE.md](references/SKILLING-PATH-TEMPLATE.md)
 
 Resolve these references by their installed, host-provided location. Do not assume a filesystem
 root or fetch replacement instructions from elsewhere.
 
 ## Overview
 
-CSM Advisor turns a mixed pile of source materials - Word documents, PDFs, plain text
-files, PowerPoint decks, and Excel workbooks - into **one** combined analysis: a single detailed
-Word document that reflects everything that was analyzed, plus a recommended learning path for
-working through the material. The chat reply stays short (2-3 sentences and a link to the document).
-It never produces a separate summary per input file; per-file content is
-condensed into short "highlights" entries inside the one combined document.
+CSM Advisor moves from raw materials to a ready-to-use skilling plan in four stages:
 
-In addition to files, the skill can pull in the **current user's Microsoft Teams meeting recaps**
-as extra sources (see [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)). Recaps are merged
-into the same single combined summary, never summarized separately.
+| Stage | Name | Result | Deliverable |
+|-------|------|--------|-------------|
+| 1 | Collect artifacts | Validated list of sources (files, optional Teams recaps) with extracted content | Short chat inventory |
+| 2 | Detect signals and summarize | Skilling signals found across all sources | **Word document**: Signals Summary |
+| 3 | Hand-pick Learn modules | Shortlist of required Microsoft Learn modules, approved by the user | Chat shortlist |
+| 4 | Build skilling paths | Paths for Leaders, Champions, Advocates, and End Users, by role and prerequisite skills | **Word document**: Skilling Paths proposal |
+
+The skill produces one combined analysis across all sources - never a separate summary per input
+file. Only Stage 2 and Stage 4 create a Word document; Stages 1 and 3 are short chat checkpoints.
 
 ## When to Use
 
-- "Summarize these files for me using CSM Advisor."
-- "Summarize these files plus my Teams meeting recaps from the last two weeks using CSM Advisor."
-- "Analyze this batch of documents/slides/spreadsheets and tell me what's in them using CSM Advisor."
-- "I have a folder of training material in different formats - give me one overview using CSM Advisor."
-- "Build a learning path from these resources using CSM Advisor."
-- "What are the common themes across these documents using CSM Advisor?"
+- "Analyze these files and my Teams meeting recaps and tell me what skilling is needed using CSM Advisor."
+- "Use CSM Advisor to find skilling signals in these documents."
+- "Pick the Microsoft Learn modules we need based on the signals, using CSM Advisor."
+- "Build skilling paths for leaders, champions, advocates, and end users using CSM Advisor."
 
 ## When NOT to Use
 
-- The user wants a distinct, standalone summary per file -> summarize each file individually instead
-  of using this skill.
+- The user wants a distinct, standalone summary per file -> summarize each file individually instead.
 - The user wants new content authored (a new document, deck, or workbook) rather than analysis of
-  existing files -> use the built-in **docx**, **pptx**, or **xlsx** skills.
-- None of the attached/selected files are in a supported format (see
-  [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)).
+  existing sources -> use the built-in **docx**, **pptx**, or **xlsx** skills.
+- No source is readable (no supported files and no recaps found) - tell the user and stop.
 
-## Workflow
+## Stage Gates (approval after every stage)
 
-### Phase 1 - Discover and validate inputs
+After each stage, stop and wait for the user's approval before starting the next one:
+
+1. Reply with the short completion message for that stage (see each stage below).
+2. End with one question: approve and continue, or what to change.
+3. Apply requested changes and re-present before moving on. Never start the next stage without
+   approval.
+
+Exceptions:
+- If the user says to run all stages without stopping, run them in order and skip the gates, but
+  still honor each stage's deliverable.
+- The user may start at a later stage by supplying its inputs (e.g. an existing signals summary or
+  a list of Learn modules). Skip earlier stages only when their output is already provided.
+
+Carry each stage's approved output forward as the input to the next stage. Do not invent data to
+fill a gap; say what is missing and ask.
+
+## Stage 1 - Collect artifacts
 
 1. Collect the full list of files the user pointed to (attached, selected, or in a named folder).
-2. Classify each file by extension: `.docx`, `.pdf`, `.txt`, `.pptx`, `.xlsx`/`.xls`.
+2. Classify each by extension: `.docx`, `.pdf`, `.txt`, `.pptx`, `.xlsx`/`.xls`.
 3. Flag any file with an unsupported extension or that fails to open (corrupted, password-protected,
-   zero-byte, or an image-only/scanned PDF with no extractable text layer). List these under
-   "Unsupported or unreadable files" in the final summary instead of silently skipping them.
-4. If zero files are supported and readable, stop and tell the user instead of producing an empty
-   summary (unless Teams meeting recaps were requested and found - they count as sources).
-5. **Teams meeting recaps (optional):** only when the user asks for them (or confirms an offer),
-   retrieve recaps for the current signed-in user using the Microsoft 365 / Teams tools available
-   in Cowork, following [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md). Confirm the time
-   range or meeting names if not given. Only read meetings the user already has access to; if no
-   Teams/meeting tool is available or access is denied, say so in the summary and continue with the
-   files.
+   zero-byte, or an image-only/scanned PDF with no extractable text layer). Keep these for the
+   "Unsupported or Unreadable Sources" list instead of silently skipping them.
+4. **Teams meeting recaps (optional):** only when the user asks for them (or accepts an offer),
+   retrieve recaps for the current signed-in user using the Microsoft 365 / Teams tools available in
+   Cowork, following [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md). Confirm the time range
+   or meeting names if not given. Only read meetings the user already has access to.
+5. Extract content per format following
+   [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md). Extract source by source, but do
+   not write per-source summaries.
+6. If zero sources are readable, stop and tell the user.
 
-### Phase 2 - Extract content per format
+**Stage 1 reply (chat only, no document):** 2-3 sentences - how many files and recaps were
+collected, which formats, and any that could not be read - then ask for approval to continue.
 
-Follow [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md) for exactly what to pull
-out of each file type (headings, body text, tables, slide text and notes, sheet/cell values, etc.).
-Extract Teams meeting recap content as described in
-[references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md).
-Extract text file-by-file, but keep working toward a single combined analysis - do not write a
-final summary for each file at this stage.
+## Stage 2 - Detect signals and summarize
 
-### Phase 3 - Consolidate across all files
+Analyze all collected content together and detect **signals**: evidence that points to a skilling
+need or a change in plans. Follow
+[references/SIGNALS-SUMMARY-TEMPLATE.md](references/SIGNALS-SUMMARY-TEMPLATE.md) for the signal
+categories, evidence rules, and document structure.
 
-1. Build one internal picture of all extracted content together.
-2. Identify themes, topics, or skills that repeat across multiple files.
-3. Identify contradictions, gaps, or topics mentioned in only one file.
-4. Note the relative depth/complexity of each file (introductory vs. advanced) to help order a
-   learning path.
+1. Build one picture across all sources; find themes that repeat in several sources.
+2. Record signals with evidence: which source, and a short quote or paraphrase. Mark signal strength
+   (strong = several sources or an explicit statement, weak = a single mention).
+3. Note contradictions, gaps, and duplicate sources; note introductory vs. advanced depth.
+4. Capture decisions and action items (with owners) from meetings and documents.
+5. Write **one Word (`.docx`) document** using the built-in **docx** skill. Main heading exactly
+   **"Signals Summary"**, scenario/customer name on a subtitle line. Save it in the user's task/output
+   folder (or the location they named); never overwrite an existing file - add a date or version
+   suffix. Ask once where to save if unclear.
 
-### Phase 4 - Produce exactly one combined Word document
+**Stage 2 reply (chat):** 2-3 sentences - what was analyzed, the single most important signal, and a
+link to the Word document - then ask for approval. Do not repeat the document's sections in chat.
 
-Write the full, detailed analysis to **one Word (`.docx`) document**, following the structure in
-[references/SUMMARY-TEMPLATE.md](references/SUMMARY-TEMPLATE.md). Use the built-in **docx** skill to
-create the file. The document must cover every analyzed file and source but must remain one
-document, not a collection of per-file reports. Do not skip creating the document, and do not put
-the detailed analysis in the chat reply.
+## Stage 3 - Hand-pick required Microsoft Learn modules
 
-- Save the file in the user's task/output folder (or the location the user named) and give it a
-  descriptive name, e.g. `Skilling Paths proposal - <scenario>.docx`. If it is unclear where to
-  save it, ask once; never overwrite an existing file - add a date or version suffix instead.
-- The document's main heading (the first, top-level title) must be exactly
-  **"Skilling Paths proposal"**. Use this heading regardless of the scenario/batch name - put any
-  scenario-specific name on a subtitle/second line below it instead of replacing it.
+Using the approved signals, propose a shortlist of **real** Microsoft Learn modules or learning
+paths, following [references/LEARN-MODULES.md](references/LEARN-MODULES.md).
 
-### Phase 5 - Reply with a short completion message
+1. For each approved skilling need, search Microsoft Learn (learn.microsoft.com) with the Learn/web
+   tools available in Cowork. Never invent module names or URLs; if no tool can reach Learn, say so
+   and ask the user to supply modules.
+2. Hand-pick only what the signals justify: prefer fewer, better-matched modules over long lists.
+3. Present the shortlist in chat as a compact table (module title, link, level, approximate
+   duration, the signal it addresses, intended learner groups) plus the **assumed prerequisite
+   skills for Leaders, Champions, Advocates, and End Users** so the user can correct them.
+4. The user approves, or edits the list (add, remove, replace). Re-present after edits.
 
-After the document is created, reply in chat with **only 2-3 sentences** plus a link to the file:
+**Stage 3 deliverable:** the shortlist is a chat checkpoint, not a document. Ask for approval to
+continue to Stage 4.
 
-1. What was analyzed (e.g. "I analyzed 5 files and 3 Teams meeting recaps").
-2. The single most important finding or recommendation.
-3. A link to the generated Word document (e.g. "Full details: [Skilling Paths proposal](link)").
+## Stage 4 - Build skilling paths per learner group
 
-Do not repeat the document's sections, themes, per-file highlights, or learning path in the chat
-reply. If some sources could not be read, mention that in one short clause and point to the
-"Unsupported or Unreadable Files" section of the document. If the document could not be created,
-say so plainly and offer to retry instead of pasting the full analysis into chat.
+Using the approved signals and approved Learn modules, build a skilling path for each learner group
+by role and prerequisite skills, following
+[references/SKILLING-PATH-TEMPLATE.md](references/SKILLING-PATH-TEMPLATE.md):
+
+- **Leaders**, **Champions**, **Advocates**, **End Users** (see the reference for how each group is
+  defined).
+- For each group: role focus, prerequisite skills (and which modules cover them), an ordered list of
+  approved modules, milestones/timing, and the outcome expected.
+- Use only modules approved in Stage 3. If a group has a gap no approved module covers, list it as
+  an open gap rather than inventing a module.
+
+Write **one Word (`.docx`) document** using the built-in **docx** skill. Main heading exactly
+**"Skilling Paths proposal"**, scenario/customer name on a subtitle line. Same saving rules as
+Stage 2 (task/output folder, no overwriting, descriptive name such as
+`Skilling Paths proposal - <scenario>.docx`).
+
+**Stage 4 reply (chat):** 2-3 sentences - how many groups and modules the plan covers, the key
+recommendation, and a link to the Word document. Do not repeat the plan in chat.
 
 ## Edge Cases
 
 - **Very large files:** summarize in logical chunks internally (per chapter/section/slide range/
-  sheet) before rolling up into the one combined summary; do not ask the user to split files unless
-  extraction genuinely fails.
-- **Scanned/image-only PDFs:** no OCR is performed by this skill; note the file as unreadable rather
-  than guessing its contents.
-- **Password-protected or corrupted files:** list under unreadable files; do not attempt to bypass
-  protection.
-- **Teams recaps unavailable:** if recaps are missing, not generated for a meeting, or the Teams
-  tool is not connected/permitted, list that meeting or the whole source under "Unsupported or
-  unreadable files" - never invent recap content.
-- **Duplicate or near-duplicate files:** mention the duplication once in the combined summary rather
-  than repeating the same content for each copy.
+  sheet) before rolling up; do not ask the user to split files unless extraction genuinely fails.
+- **Scanned/image-only PDFs:** no OCR is performed; list the file as unreadable rather than guessing.
+- **Password-protected or corrupted files:** list as unreadable; do not attempt to bypass protection.
+- **Teams recaps unavailable:** if recaps are missing, not generated, or the Teams tool is not
+  connected or permitted, list that meeting or source as unreadable - never invent recap content.
+- **Duplicate or near-duplicate files:** mention the duplication once rather than repeating content.
+- **Document cannot be created:** say so plainly and offer to retry; do not paste the full document
+  into chat.
+- **Conflicting or thin signals:** say so in the Signals Summary and ask at the gate instead of
+  guessing a skilling need.
+- **Sensitive content:** meeting recaps may contain sensitive discussion; keep output
+  scoped to the request and place detail only in the Word documents.

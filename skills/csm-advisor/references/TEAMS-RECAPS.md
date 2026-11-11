@@ -27,20 +27,20 @@ shares content.
 - Transcript excerpts only when the recap has no summary, or the user asks for detail.
 - Linked or shared files are NOT analyzed automatically; mention them and let the user attach them.
 
-## How to represent them in the summary
+## How to represent them in the Signals Summary (Stage 2)
 
 - List each meeting under **Sources** as `<Meeting title> (Teams recap, <date>)`.
-- Fold themes, decisions, and action items into the combined themes and learning path.
-- In **Per-File Highlights**, keep a short entry per meeting (2-4 bullets).
-- Add a **Decisions and Action Items from Meetings** section when any were found.
+- Fold signals, themes, decisions, and action items into the combined Signals Summary.
+- In **Per-Source Highlights**, keep a short entry per meeting (2-4 bullets).
+- Use the **Decisions and Action Items** section for any found in meetings.
 
 ## Unavailable recaps
 
 - Meetings with no recap (recording/transcription was off, still processing, or retention expired)
-  go under **Unsupported or Unreadable Files** with the reason. Do not infer content from the
+  go under **Unsupported or Unreadable Sources** with the reason. Do not infer content from the
   title or attendees.
 
 ## Privacy
 
-- Summaries may contain sensitive discussion. Keep output scoped to what the user asked for. The
-  detailed content goes only into the generated Word document; the chat reply stays short.
+- Recaps may contain sensitive discussion. Keep output scoped to what the user asked for. Detailed
+  content goes only into the generated Word documents; chat replies stay short.

@@ -29,7 +29,7 @@
   <section class="hero container">
     <h1>CSM Advisor</h1>
     <p class="tagline">
-      One combined summary across Word, PDF, text, PowerPoint, and Excel files -
+      Role-based Microsoft Learn skilling paths from your files and Teams recaps -
       a plugin for Microsoft Copilot Cowork.
     </p>
     <div class="cta">
@@ -45,10 +45,19 @@
     <h2>Overview</h2>
     <p>
       Point CSM Advisor at a mixed batch of files - <code>.docx</code>, <code>.pdf</code>,
-      <code>.txt</code>, <code>.pptx</code>, <code>.xlsx</code>/<code>.xls</code> - and it reads all
-      of them and returns a single consolidated summary: cross-file themes, per-file highlights,
-      gaps/overlaps, and a suggested learning path. It never produces a separate summary per file.
+      <code>.txt</code>, <code>.pptx</code>, <code>.xlsx</code>/<code>.xls</code> - and optionally
+      your Teams meeting recaps. It works in four stages and pauses for your approval after each:
     </p>
+    <ol>
+      <li><strong>Collect artifacts</strong> - reads the files and recaps.</li>
+      <li><strong>Detect signals and summarize</strong> - produces a <em>Signals Summary</em> Word document.</li>
+      <li><strong>Hand-pick Microsoft Learn modules</strong> - a shortlist you approve or edit.</li>
+      <li>
+        <strong>Build skilling paths</strong> - a <em>Skilling Paths proposal</em> Word document for
+        Leaders, Champions, Advocates, and End Users, by role and prerequisite skills.
+      </li>
+    </ol>
+    <p>
     <figure>
       <img src="assets/screenshots/plugins-list.png" alt="Cowork installed plugins list showing CSM Advisor">
       <figcaption>Cowork &gt; Customize &gt; Plugins, with CSM Advisor installed.</figcaption>
@@ -90,17 +99,21 @@
     <h2>Verify</h2>
     <p>Start a new Cowork conversation and try the prompt below:</p>
     <div class="code-block">
-      <pre><code>Summarize these files into one combined summary using CSM Advisor: &lt;attach/select 2+ files
-in Word, PDF, text, PowerPoint, and/or Excel format&gt;.</code></pre>
+      <pre><code>Use CSM Advisor to find skilling signals in these files and build skilling paths:
+&lt;attach/select 2+ files in Word, PDF, text, PowerPoint, and/or Excel format&gt;.
+Include my Teams meeting recaps from the last 2 weeks.</code></pre>
       <button class="copy-btn" type="button">Copy</button>
     </div>
     <figure>
-      <img src="assets/screenshots/combined-summary-output.png" alt="Combined summary output in chat">
-      <figcaption>Expected result: a short reply with a link to one Word document containing the combined summary.</figcaption>
+      <img src="assets/screenshots/combined-summary-output.png" alt="CSM Advisor reply in chat">
+      <figcaption>Expected result: a short reply after each stage, with links to the Word documents for Stage 2 and Stage 4.</figcaption>
     </figure>
     <p>
-      Open the linked Word document and confirm it follows the structure in
-      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SUMMARY-TEMPLATE.md">SUMMARY-TEMPLATE.md</a>.
+      Reply "approve" after each stage to continue, or ask for changes. Open the linked Word
+      documents and confirm they follow the structure in
+      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SIGNALS-SUMMARY-TEMPLATE.md">SIGNALS-SUMMARY-TEMPLATE.md</a>
+      and
+      <a href="https://github.com/true-while/CSM-advisor/blob/main/skills/csm-advisor/references/SKILLING-PATH-TEMPLATE.md">SKILLING-PATH-TEMPLATE.md</a>.
     </p>
   </section>
 
