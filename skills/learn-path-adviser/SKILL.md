@@ -1,5 +1,5 @@
 ---
-name: learn-path-adviser
+name: CSM Advisor
 description: >-
   Analyzes files in Word (.docx), PDF, text (.txt), PowerPoint (.pptx), and Excel (.xlsx/.xls)
   formats, optionally plus the user's Microsoft Teams meeting recaps, and produces exactly ONE
@@ -23,7 +23,7 @@ root or fetch replacement instructions from elsewhere.
 
 ## Overview
 
-Learn Path Adviser turns a mixed pile of source materials - Word documents, PDFs, plain text
+CSM Advisor turns a mixed pile of source materials - Word documents, PDFs, plain text
 files, PowerPoint decks, and Excel workbooks - into **one** combined analysis: a single summary
 document that reflects everything that was analyzed, plus a recommended learning path for working
 through the material. It never produces a separate summary per input file; per-file content is
@@ -35,12 +35,12 @@ into the same single combined summary, never summarized separately.
 
 ## When to Use
 
-- "Summarize these files for me."
-- "Summarize these files plus my Teams meeting recaps from the last two weeks."
-- "Analyze this batch of documents/slides/spreadsheets and tell me what's in them."
-- "I have a folder of training material in different formats - give me one overview."
-- "Build a learning path from these resources."
-- "What are the common themes across these documents?"
+- "Summarize these files for me using CSM Advisor."
+- "Summarize these files plus my Teams meeting recaps from the last two weeks using CSM Advisor."
+- "Analyze this batch of documents/slides/spreadsheets and tell me what's in them using CSM Advisor."
+- "I have a folder of training material in different formats - give me one overview using CSM Advisor."
+- "Build a learning path from these resources using CSM Advisor."
+- "What are the common themes across these documents using CSM Advisor?"
 
 ## When NOT to Use
 

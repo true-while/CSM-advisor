@@ -55,7 +55,7 @@ Cowork will update the existing plugin in place rather than installing a second 
 
 To ship a change to this plugin:
 
-1. Make your changes under `skills/learn-path-adviser/`.
+1. Make your changes under `skills/CSM-advisor/`.
 2. Bump `version` in `manifest.json` and the `metadata.version` field in `SKILL.md`.
 3. Push to `main`. The release workflow ([.github/workflows/release.yml](.github/workflows/release.yml))
    detects the version bump, builds the ZIP, publishes it as a new GitHub Release tagged
