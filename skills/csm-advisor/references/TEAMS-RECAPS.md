@@ -1,7 +1,7 @@
 # Microsoft Teams Meeting Recaps
 
 Optional additional source. Recaps are treated like any other input: extracted, then merged into
-the ONE combined summary. This skill only reads recaps; it never posts to Teams, edits meetings, or
+the ONE combined analysis. This skill only reads recaps; it never posts to Teams, edits meetings, or
 shares content.
 
 ## Access and permissions

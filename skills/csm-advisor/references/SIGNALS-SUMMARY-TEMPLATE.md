@@ -3,82 +3,109 @@
 Produce exactly one Word (`.docx`) document using this structure, regardless of how many sources
 were analyzed. Omit a section only if it genuinely does not apply.
 
-The main heading must be exactly **"Signals Summary"**. Put the scenario/customer name on a subtitle
+The main heading must be exactly **"Signals Summary"**. Put the customer/scenario name on a subtitle
 line underneath, not in the main heading.
 
-## What counts as a signal
-
-A signal is evidence in the sources that points to a skilling need, or to a change that affects
-skilling plans. Look for these categories:
-
-- **Skill gaps and needs:** topics people struggle with, ask about, or are explicitly asked to learn.
-- **Adoption blockers and risks:** reasons usage is low or stalled (tools, access, policy, time).
-- **Changes in plans:** training cancelled, postponed, expanded, or re-scoped; new deadlines.
-- **Roles and audiences:** who is mentioned as needing skills (leaders, champions, advocates, end
-  users, or other roles) and what each group already knows.
-- **Existing knowledge and prior training:** what has been completed or is already in place
-  (feeds prerequisite skills).
-- **Goals and success measures:** targets, KPIs, or outcomes the audience cares about.
-- **Decisions and action items:** commitments with owners and dates.
-
-For every signal record: the statement, the source(s) it came from (file name or meeting title and
-date), a short quote or paraphrase as evidence, and strength - **strong** (several sources or an
-explicit statement) or **weak** (single mention, unclear). Never invent evidence.
+What to extract, the signal record fields, and the readiness and blocker rules are defined in
+[SIGNAL-COLLECTION.md](SIGNAL-COLLECTION.md). Follow them; never invent values.
 
 ## Chat reply (separate from the document)
 
-The detailed content below goes ONLY into the Word document. In chat reply with 2-3 sentences (what
-was analyzed, the single most important signal, and a link to the document), then ask for approval:
+The detail goes ONLY into the Word document. In chat reply with 2-3 sentences (what was analyzed,
+the single most important finding, and a link to the document), state the stage status, then ask
+for approval:
 
-> I analyzed 5 files and 3 Teams meeting recaps for <scenario>. The strongest signal is <one key
-> signal>. Full details: [Signals Summary](<link to the .docx>). Approve to continue to picking
-> Microsoft Learn modules, or tell me what to change.
+> I analyzed 5 files and 3 Teams meeting recaps for <customer>. The customer outcome is <outcome>;
+> readiness is <Ready with conditions> and <N> items of information are still missing. Full details:
+> [Signals Summary](<link to the .docx>). Status: <status>. Approve to continue to path selection,
+> or tell me what to change or add.
+
+Stage 2 status (one of): **Ready for path selection**, **More customer information required**,
+**Not ready for path selection** (customer outcome missing), **Non-skilling blocker identified**.
+When the status is not "Ready for path selection", say what is needed and do not continue to
+Stage 3 unless the user asks to.
 
 ## Document structure
 
 ```text
 # Signals Summary
-<Scenario/Customer Name> (subtitle line)
+<Customer / Scenario Name> (subtitle line)
 
 Generated: <date>
 Sources analyzed: <count> (<formats present, e.g. "2 Word, 1 PDF, 3 PowerPoint, 1 Excel">)
-Teams meeting recaps included: <count, or omit this line if none>
+Teams meeting recaps included: <count, or omit if none>
+Status: <Stage 2 status>
 
 ## Sources
 - <file name> (.docx) - <one-line description>
 - <meeting title> (Teams recap, <date>) - <one-line description>
-- ... one line per analyzed file or meeting recap
+- ... one line per analyzed file, recap, or provided link
 
 ## Executive Overview
-<3-6 sentences across ALL sources: what the material covers, the main skilling needs, and why they
-matter.>
+<3-6 sentences across ALL sources: the customer outcome, what the signals say, the readiness, and
+what is missing.>
 
-## Signals
-### <Signal category>
-- <Signal statement> - strength: <strong/weak>; sources: <which>; evidence: "<short quote or
-  paraphrase>"
-- ...
+## 1. Customer Outcome
+- Stated business priority / desired outcome:
+- Priority workflows or scenarios:
+- Business deadline:
+- Success measure / metric owner / evidence location:
+- Named customer sponsor / skilling champion:
+(Mark "Not provided" for anything missing. If the outcome is missing: **Not ready for path selection**.)
 
-## Key Themes Across All Sources
-- <Theme>: appears in <which sources>; <1-2 sentence synthesis>
+## 2. Signal Inventory
+| Signal | Value or finding | Source | Source date | Confidence | Validation required |
+|--------|------------------|--------|-------------|------------|---------------------|
+| <signal> | <value> | <source> | <date or n/a> | Confirmed / Probable / Unconfirmed | Yes / No |
 
-## Audience and Roles Observed
-- <Role or group>: <what the sources say about their needs and current knowledge>
+### Adoption and usage
+- Licenses purchased / assigned / activated; active and inactive users:
+- Adoption percentage (only with a reliable denominator, else "not calculated"):
+- Applications and features used; frequency and depth; repeat workflows; priority workflows not yet
+  supported:
+- Baseline, baseline date, data source, metric definition:
+- Usage pattern: <No/very low activation | Initial or occasional | Active but shallow | Repeatable
+  workflow usage | Advanced / agents>
+
+## 3. Audiences and Capability Gaps
+For each audience group found in the sources:
+- <Audience> - role/persona; population; current skill level; required capabilities; priority
+  applications and workflows; delivery format; availability; cloud/environment; accessibility,
+  location, language; customer-owned reinforcement
+
+## 4. Sponsorship and Readiness
+- Checklist: sponsor named; champion named; outcome agreed; audiences can participate; time for
+  practice; licensing and access; feature/cloud availability; security and compliance understood;
+  labs/demos/recordings/data usable; Microsoft and customer capacity - each Yes / No / Unknown
+- Readiness: <Ready | Ready with conditions | Not ready | Unknown>
+- Conditions to resolve before delivery is committed: <list>
+
+## 5. Cause Confirmation and Non-Skilling Blockers
+- Primary cause: <skills/awareness, scenarios, sponsorship/reinforcement, licensing/access, technical
+  configuration, security/compliance, feature/cloud availability, procurement, customer capacity,
+  Microsoft capacity, other>
+- Is skilling the primary intervention? <Yes / No / Partly>
+- If No or Partly: blocker, accountable team to route to, and what must change before skilling is
+  reconsidered
+
+## 6. Missing Information
+- <Item to request> - from whom (CSM / customer / account team)
+
+## 7. Contradictions and Gaps
+- <Conflicting values or dates between sources; topics covered by only one source; duplicates>
+
+## 8. Decisions and Action Items
+- <Decision or action item> - <owner if known> (<source, date>)
 
 ## Per-Source Highlights
 - <source name>: <2-4 bullets specific to that source> (short - not a second full summary)
 
-## Decisions and Action Items
-- <Decision or action item> - <owner if known> (<source, date>)
-
-## Gaps, Overlaps, or Contradictions
-- <Topic covered by only one source, duplicated across sources, or inconsistent between sources>
-
 ## Unsupported or Unreadable Sources
 - <file name> - <reason, e.g. "scanned PDF with no text layer", "unsupported extension">
 - <meeting title> (Teams recap) - <reason, e.g. "no recap generated", "access denied">
+- Input types not supplied (from the list in SIGNAL-COLLECTION.md)
 ```
 
-Keep "Per-Source Highlights" short - it exists so readers can trace signals back to a source. The
-"Executive Overview", "Signals", and "Key Themes" sections are what make this one combined summary
-rather than a collection of per-file summaries.
+Keep "Per-Source Highlights" short - it exists so readers can trace signals to a source. The
+"Executive Overview" and "Signal Inventory" are what make this one combined document rather than a
+collection of per-file summaries. Treat the document as a proposal input, not a validated finding.

@@ -14,8 +14,8 @@
     "full": "CSM Advisor for Microsoft Copilot Cowork"
   },
   "description": {
-    "short": "Role-based Microsoft Learn skilling paths from your files and recaps.",
-    "full": "CSM Advisor turns your Word, PDF, text, PowerPoint and Excel files, plus your Microsoft Teams meeting recaps if you ask, into role-based Microsoft Learn skilling paths. It works in four stages with your approval after each: collect artifacts, detect signals and write a Signals Summary Word document, hand-pick Microsoft Learn modules, and build a Skilling Paths proposal Word document for Leaders, Champions, Advocates and End Users based on role and prerequisite skills."
+    "short": "Customer signals to an evidence-based, role-based skilling plan.",
+    "full": "CSM Advisor helps CSMs, account teams, MTTMs and MTTs turn customer files (Word, PDF, text, PowerPoint, Excel), emails, usage reports and optional Teams meeting recaps into an evidence-based skilling proposal. It works in four stages with your approval after each: collect artifacts, extract signals into a Signals Summary Word document, select an Activate, Deepen, Protect or Convert and Extend path and hand-pick Microsoft Learn modules, and build a Skilling Paths proposal Word document by audience for MTT review."
   },
   "icons": {
     "color": "color.png",

@@ -1,11 +1,13 @@
 # CSM Advisor
 
-A plugin for Microsoft Copilot Cowork that turns your files and Teams meeting recaps into **role-based Microsoft Learn skilling paths**, in four stages with an approval pause after each:
+A plugin for Microsoft Copilot Cowork that helps CSMs, account teams, MTTMs, and MTTs turn customer materials and Teams meeting recaps into an **evidence-based, role-based skilling plan**, in four stages with an approval pause after each:
 
-1. **Collect artifacts** - Word, PDF, text, PowerPoint, Excel files and optional Teams meeting recaps
-2. **Detect signals and summarize** - produces a *Signals Summary* Word document
-3. **Hand-pick Microsoft Learn modules** - a shortlist you approve or edit
-4. **Build skilling paths** - a *Skilling Paths proposal* Word document for Leaders, Champions, Advocates, and End Users, by role and prerequisite skills
+1. **Collect artifacts** - Word, PDF, text, PowerPoint, Excel files, emails, usage reports, notes, and optional Teams meeting recaps
+2. **Detect signals and summarize** - customer outcome, adoption and usage signals, audiences, readiness, blockers, and missing information in a *Signals Summary* Word document
+3. **Select the path and hand-pick Microsoft Learn modules** - Activate, Deepen, Protect, or Convert and Extend from confirmed signals, plus a Learn shortlist you approve or edit
+4. **Build the skilling plan** - a *Skilling Paths proposal* Word document with an executive summary, internal MTT review by audience, measurement plan, and 60-to-90-day review
+
+The output is always a proposal for MTT and account-stakeholder validation.
 
 ## Install
 

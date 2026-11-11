@@ -29,7 +29,7 @@
   <section class="hero container">
     <h1>CSM Advisor</h1>
     <p class="tagline">
-      Role-based Microsoft Learn skilling paths from your files and Teams recaps -
+      Evidence-based, role-based skilling plans from customer files and Teams recaps -
       a plugin for Microsoft Copilot Cowork.
     </p>
     <div class="cta">
@@ -44,20 +44,33 @@
   <section id="overview" class="container">
     <h2>Overview</h2>
     <p>
-      Point CSM Advisor at a mixed batch of files - <code>.docx</code>, <code>.pdf</code>,
-      <code>.txt</code>, <code>.pptx</code>, <code>.xlsx</code>/<code>.xls</code> - and optionally
-      your Teams meeting recaps. It works in four stages and pauses for your approval after each:
+      Point CSM Advisor at a customer's materials - <code>.docx</code>, <code>.pdf</code>,
+      <code>.txt</code>, <code>.pptx</code>, <code>.xlsx</code>/<code>.xls</code> files, plus emails,
+      usage reports, and notes - and optionally your Teams meeting recaps. It works in four stages
+      and pauses for your approval after each:
     </p>
     <ol>
       <li><strong>Collect artifacts</strong> - reads the files and recaps.</li>
-      <li><strong>Detect signals and summarize</strong> - produces a <em>Signals Summary</em> Word document.</li>
-      <li><strong>Hand-pick Microsoft Learn modules</strong> - a shortlist you approve or edit.</li>
       <li>
-        <strong>Build skilling paths</strong> - a <em>Skilling Paths proposal</em> Word document for
-        Leaders, Champions, Advocates, and End Users, by role and prerequisite skills.
+        <strong>Detect signals and summarize</strong> - customer outcome, adoption and usage signals,
+        audiences, readiness, non-skilling blockers, and missing information, each with source and
+        confidence (Confirmed, Probable, Unconfirmed), in a <em>Signals Summary</em> Word document.
+      </li>
+      <li>
+        <strong>Select the path and hand-pick Microsoft Learn modules</strong> - Activate, Deepen,
+        Protect, or Convert and Extend (alone or combined) from confirmed signals, plus a shortlist
+        you approve or edit.
+      </li>
+      <li>
+        <strong>Build the skilling plan</strong> - a <em>Skilling Paths proposal</em> Word document
+        with an executive summary and an internal MTT review by audience, measurement plan, and a
+        60-to-90-day review.
       </li>
     </ol>
-    <p>
+    <p class="note">
+      The result is always a proposal for MTT and account-stakeholder validation, never an
+      approved plan.
+    </p>
     <figure>
       <img src="assets/screenshots/plugins-list.png" alt="Cowork installed plugins list showing CSM Advisor">
       <figcaption>Cowork &gt; Customize &gt; Plugins, with CSM Advisor installed.</figcaption>
@@ -99,9 +112,9 @@
     <h2>Verify</h2>
     <p>Start a new Cowork conversation and try the prompt below:</p>
     <div class="code-block">
-      <pre><code>Use CSM Advisor to find skilling signals in these files and build skilling paths:
-&lt;attach/select 2+ files in Word, PDF, text, PowerPoint, and/or Excel format&gt;.
-Include my Teams meeting recaps from the last 2 weeks.</code></pre>
+      <pre><code>Use CSM Advisor to analyze this customer's materials, extract signals and readiness, and
+recommend a skilling path: &lt;attach/select the customer files&gt;.
+Include my Teams meeting recaps for &lt;customer&gt; from the last 2 weeks.</code></pre>
       <button class="copy-btn" type="button">Copy</button>
     </div>
     <figure>
