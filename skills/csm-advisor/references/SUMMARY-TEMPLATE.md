@@ -1,15 +1,26 @@
 # Combined Summary Output Template
 
-Produce exactly one summary using this structure, regardless of how many files were analyzed.
-Omit a section only if it genuinely does not apply (e.g. no unreadable files).
+Produce exactly one document using this structure, regardless of how many files were analyzed. It
+is always delivered as a Word (`.docx`) file. Omit a section only if it genuinely does not apply
+(e.g. no unreadable files).
 
-If the summary is delivered as a Word (`.docx`) document, its main heading must be exactly
-**"Skilling Paths proposal"** - put the scenario/batch name on a subtitle line underneath instead of
-in the main heading. For chat text or a Page, the `# <Scenario/Batch Name> - Combined Analysis`
-heading below is still used as-is.
+The document's main heading must be exactly **"Skilling Paths proposal"** - put the
+scenario/batch name on a subtitle line underneath instead of in the main heading. In the template
+below, the first line shows that title and subtitle.
+
+## Chat reply (separate from the document)
+
+The detailed content below goes ONLY into the Word document. In chat, reply with 2-3 sentences (what
+was analyzed, the key finding, and a link to the document) and nothing more:
+
+> I analyzed 5 files and 3 Teams meeting recaps for <scenario>. The main takeaway is <one key
+> finding or recommendation>. Full details: [Skilling Paths proposal](<link to the .docx>)
+
+## Document structure
 
 ```text
-# <Scenario/Batch Name> - Combined Analysis
+# Skilling Paths proposal
+<Scenario/Batch Name> - Combined Analysis (subtitle line)
 
 Generated: <date>
 Files analyzed: <count> (<formats present, e.g. "2 Word, 1 PDF, 3 PowerPoint, 1 Excel">)

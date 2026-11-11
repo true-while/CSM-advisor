@@ -42,5 +42,5 @@ shares content.
 
 ## Privacy
 
-- Summaries may contain sensitive discussion. Keep output scoped to what the user asked for, and
-  confirm the destination (chat, Word document, or Page) before writing anything out.
+- Summaries may contain sensitive discussion. Keep output scoped to what the user asked for. The
+  detailed content goes only into the generated Word document; the chat reply stays short.

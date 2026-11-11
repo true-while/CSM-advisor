@@ -4,7 +4,8 @@ description: >-
   Analyzes files in Word (.docx), PDF, text (.txt), PowerPoint (.pptx), and Excel (.xlsx/.xls)
   formats, optionally plus the user's Microsoft Teams meeting recaps, and produces exactly ONE
   consolidated summary of all sources combined, with cross-file themes, gaps, and a suggested
-  learning path. Use when the user asks to "summarize these documents", "analyze these files",
+  learning path. The detailed result is always saved as one Word document; the chat reply is only
+  2-3 sentences plus a link to that file. Use when the user asks to "summarize these documents", "analyze these files",
   "build a learning path from these files", "one summary of everything in this folder", or to
   "include my Teams meeting recaps". Do NOT use when the user wants a separate summary per file,
   or to create new decks, documents, or workbooks (use the built-in docx/pptx/xlsx skills).
@@ -24,10 +25,11 @@ root or fetch replacement instructions from elsewhere.
 ## Overview
 
 CSM Advisor turns a mixed pile of source materials - Word documents, PDFs, plain text
-files, PowerPoint decks, and Excel workbooks - into **one** combined analysis: a single summary
-document that reflects everything that was analyzed, plus a recommended learning path for working
-through the material. It never produces a separate summary per input file; per-file content is
-condensed into short "highlights" entries inside the one combined output.
+files, PowerPoint decks, and Excel workbooks - into **one** combined analysis: a single detailed
+Word document that reflects everything that was analyzed, plus a recommended learning path for
+working through the material. The chat reply stays short (2-3 sentences and a link to the document).
+It never produces a separate summary per input file; per-file content is
+condensed into short "highlights" entries inside the one combined document.
 
 In addition to files, the skill can pull in the **current user's Microsoft Teams meeting recaps**
 as extra sources (see [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)). Recaps are merged
@@ -86,19 +88,33 @@ final summary for each file at this stage.
 4. Note the relative depth/complexity of each file (introductory vs. advanced) to help order a
    learning path.
 
-### Phase 4 - Produce exactly one combined summary
+### Phase 4 - Produce exactly one combined Word document
 
-Generate a single summary following the structure in
-[references/SUMMARY-TEMPLATE.md](references/SUMMARY-TEMPLATE.md). The summary must cover every
-analyzed file but must remain one document/response, not a collection of per-file reports.
+Write the full, detailed analysis to **one Word (`.docx`) document**, following the structure in
+[references/SUMMARY-TEMPLATE.md](references/SUMMARY-TEMPLATE.md). Use the built-in **docx** skill to
+create the file. The document must cover every analyzed file and source but must remain one
+document, not a collection of per-file reports. Do not skip creating the document, and do not put
+the detailed analysis in the chat reply.
 
-Confirm with the user, if ambiguous, whether the summary should be returned as chat text, a Word
-document, or a Page - never assume a destination folder.
+- Save the file in the user's task/output folder (or the location the user named) and give it a
+  descriptive name, e.g. `Skilling Paths proposal - <scenario>.docx`. If it is unclear where to
+  save it, ask once; never overwrite an existing file - add a date or version suffix instead.
+- The document's main heading (the first, top-level title) must be exactly
+  **"Skilling Paths proposal"**. Use this heading regardless of the scenario/batch name - put any
+  scenario-specific name on a subtitle/second line below it instead of replacing it.
 
-If the output is generated as a Word (`.docx`) document, the document's main heading (the first,
-top-level title) must be exactly **"Skilling Paths proposal"**. Use this heading regardless of the
-scenario/batch name - put any scenario-specific name on a subtitle/second line below it instead of
-replacing it.
+### Phase 5 - Reply with a short completion message
+
+After the document is created, reply in chat with **only 2-3 sentences** plus a link to the file:
+
+1. What was analyzed (e.g. "I analyzed 5 files and 3 Teams meeting recaps").
+2. The single most important finding or recommendation.
+3. A link to the generated Word document (e.g. "Full details: [Skilling Paths proposal](link)").
+
+Do not repeat the document's sections, themes, per-file highlights, or learning path in the chat
+reply. If some sources could not be read, mention that in one short clause and point to the
+"Unsupported or Unreadable Files" section of the document. If the document could not be created,
+say so plainly and offer to retry instead of pasting the full analysis into chat.
 
 ## Edge Cases
 

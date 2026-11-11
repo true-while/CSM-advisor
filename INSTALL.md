@@ -41,8 +41,8 @@ Summarize these files into one combined summary using CSM Advisor: <attach/selec
 in Word, PDF, text, PowerPoint, and/or Excel format>.
 ```
 
-You should get back one combined summary covering all of the files together, not a separate
-summary per file.
+You should get back a short reply (2-3 sentences) with a link to one Word document that contains the
+detailed combined summary of all the files together, not a separate summary per file.
 
 ## Updating to a newer version
 
