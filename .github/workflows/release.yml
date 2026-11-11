@@ -1,9 +1,9 @@
 name: Release Cowork Plugin
 
-# Builds dist/learn-path-adviser.zip and publishes it as a GitHub Release tagged with the
+# Builds dist/CSM-advisor.zip and publishes it as a GitHub Release tagged with the
 # manifest.json version whenever that version changes on main. Existing version tags/releases are
 # never overwritten, and the "latest" release always exposes a stable download link:
-#   https://github.com/<owner>/<repo>/releases/latest/download/learn-path-adviser.zip
+#   https://github.com/<owner>/<repo>/releases/latest/download/CSM-advisor.zip
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "v${{ steps.version.outputs.version }}" \
-            dist/learn-path-adviser.zip \
+            dist/CSM-advisor.zip \
             --repo "${{ github.repository }}" \
             --title "Learn Path Adviser v${{ steps.version.outputs.version }}" \
             --notes "Automated release built from manifest.json version ${{ steps.version.outputs.version }}. Install via Cowork > Customize > Plugins > Add plugin."

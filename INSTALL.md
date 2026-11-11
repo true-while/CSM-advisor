@@ -9,19 +9,19 @@ the plugin and add it in Cowork.
 Download the plugin ZIP using the link below. It always points to the newest version - you don't
 need to build or unzip anything yourself:
 
-[**Download Learn Path Adviser**](https://github.com/true-while/CSM-advisor/releases/latest/download/learn-path-adviser.zip)
+[**Download Learn Path Adviser**](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
 
 <!-- latest-version:start -->
 Latest published version: **v1.1.1** (released 2026-11-11) - [release notes](https://github.com/true-while/CSM-advisor/releases/tag/v1.1.1)
 <!-- latest-version:end -->
 
-Keep the downloaded `learn-path-adviser.zip` file intact - don't unzip it or edit its contents.
+Keep the downloaded `CSM-advisor.zip` file intact - don't unzip it or edit its contents.
 (Every past version also stays available on the [Releases page](https://github.com/true-while/CSM-advisor/releases) if you ever need an older one.)
 
 ## 2. Install in Cowork
 
 1. Open **Cowork > Customize > Add > Upload**.
-2. Select **choose a file** and pick the `learn-path-adviser.zip` you downloaded, or drag and drop it into the dialog.
+2. Select **choose a file** and pick the `CSM-advisor.zip` you downloaded, or drag and drop it into the dialog.
    
 ![Add plugin](addplugin.png)
 

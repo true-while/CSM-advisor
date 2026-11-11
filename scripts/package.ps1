@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    Packages the Learn Path Adviser plugin into dist/learn-path-adviser.zip for Cowork install/update.
+    Packages the Learn Path Adviser plugin into dist/CSM-advisor.zip for Cowork install/update.
 #>
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root "dist"
-$zipPath = Join-Path $dist "learn-path-adviser.zip"
+$zipPath = Join-Path $dist "CSM-advisor.zip"
 $stagingDir = Join-Path $dist "staging"
 
 if (Test-Path $stagingDir) { Remove-Item -Recurse -Force $stagingDir }
