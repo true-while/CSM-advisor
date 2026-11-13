@@ -1,6 +1,6 @@
-# Stage 3 - Skills Map Template
+# Stage 4 - Skills Map Template
 
-Goal: list the training skills the customer needs (detected from the Stage 2 signals) and map every
+Goal: list the training skills the customer needs (detected from the Stage 2 signals and the Stage 3 path) and map every
 skill to items from the bundled Microsoft Learn catalog (`ms-learn-catalog.json`), with the links
 that come from the catalog. Produce exactly one Word (`.docx`) document, separate from the Signals
 Summary and the Skilling Paths proposal.
@@ -32,8 +32,9 @@ courses are out of scope for this version.
 ## Chat reply (separate from the document)
 
 The detail goes ONLY into the Word document. In chat reply with 2-3 sentences (how many skills were
-identified, how many mapped to catalog items, the selected path, and a link to the document), followed
-by the `Debug - Stage 3` block from [DEBUG-LOG.md](DEBUG-LOG.md). Then continue to Stage 4:
+identified, how many mapped to catalog items, the selected path, and a link to the document). If
+debug logging is on (the request asked for it), add the `Debug - Stage 4` block from
+[DEBUG-LOG.md](DEBUG-LOG.md). Then continue to Stage 5:
 
 > I identified 9 required skills for <customer> and mapped 8 of them to 11 Microsoft Learn catalog
 > items; the selected path is Deepen. Full list: [Skills Map](<link to the .docx>).
@@ -90,7 +91,8 @@ line), current level -> target level (or "Unknown"), and the search phrases used
 - <Inferred skill, level, or audience the signals did not state outright>
 
 ## Appendix - Debug Log
-<Stage 3 step table per DEBUG-LOG.md: path-selection checks, catalog file check, one row per search
-(exact command, filters, items considered / matched / strong), coverage decisions, totals, and the
-document creation result.>
+<Include ONLY when debug logging is on; otherwise omit this whole section. Stage 3 - Path selection
+log and Stage 4 step table per DEBUG-LOG.md: path-selection checks, catalog file check, one row per
+search (exact command, filters, items considered / matched / strong), coverage decisions, totals, and
+the document creation result.>
 ```

@@ -13,7 +13,8 @@ Principles:
 - Do not claim access to any communication or data that was not supplied or made available. Do not
   invent missing values: never stop to ask for them - list them under "Missing information" or mark
   them as assumptions, and continue.
-- Log every step as described in [DEBUG-LOG.md](DEBUG-LOG.md).
+- When debug logging is on (only if the request asks for it), log every step as described in
+  [DEBUG-LOG.md](DEBUG-LOG.md).
 
 ## Inputs to analyze (Stage 1)
 
@@ -124,7 +125,7 @@ If the primary cause is not a skilling gap:
 4. Recommend routing the issue to the appropriate accountable team.
 5. Explain what must change before skilling should be reconsidered.
 
-Set the status to **Non-skilling blocker identified** and continue: Stages 3 and 4 still run, but
+Set the status to **Non-skilling blocker identified** and continue: Stages 3 to 5 still run, but
 they state that skilling is not the primary intervention and carry the blocker and routing
 recommendation forward.
 

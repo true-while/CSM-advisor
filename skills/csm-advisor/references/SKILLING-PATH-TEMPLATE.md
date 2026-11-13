@@ -1,4 +1,4 @@
-# Stage 4 - Skilling Paths Proposal Template
+# Stage 5 - Skilling Paths Proposal Template
 
 Goal: turn the Signals Summary and the Skills Map into an evidence-based skilling plan for MTT
 review. Produce exactly one Word (`.docx`) document.
@@ -50,8 +50,8 @@ Do not stop to ask the user anything. Anything uncertain goes under "Missing inf
 
 The detailed plan goes ONLY into the Word document. This is the final message of the run. Reply with
 2-3 sentences (the recommended path(s) and audiences covered, the key recommendation, and the final
-status), then links to all three documents, then the `Debug - Stage 4` block and a one-line run
-summary from [DEBUG-LOG.md](DEBUG-LOG.md):
+status), then links to all three documents. If debug logging is on (the request asked for it), add the
+`Debug - Stage 5` block and a one-line run summary from [DEBUG-LOG.md](DEBUG-LOG.md):
 
 > I built a proposed skilling plan for <customer> using <primary path> with <supporting path>, covering
 > 4 audience groups and 11 Microsoft Learn catalog items. The key recommendation is <one point>.
@@ -61,7 +61,7 @@ summary from [DEBUG-LOG.md](DEBUG-LOG.md):
 ## Document structure
 
 The document has two views. Start with the executive view, then the full 16-section internal view,
-then the debug appendix.
+then the debug appendix only if debug logging is on.
 
 ```text
 # Skilling Paths proposal
@@ -128,6 +128,7 @@ corrections.)
 identified | Not ready for delivery planning>
 
 ## Appendix - Debug Log
-<Stage 4 step table per DEBUG-LOG.md: inputs used, audiences built, items used per audience,
+<Include ONLY when debug logging is on; otherwise omit this whole section. Stage 5 step table per
+DEBUG-LOG.md: inputs used, audiences built, items used per audience,
 missing measurement fields, validation items raised, and the document creation result.>
 ```

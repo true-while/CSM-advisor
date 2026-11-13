@@ -6,7 +6,7 @@ Deepen, Protect, and Convert and Extend as a mandatory maturity sequence.
 
 If the customer outcome is missing ("Not ready for path selection") or the primary cause is a
 non-skilling blocker, do not select a path: write "No path selected" with the reason and what must
-change first, then continue with the rest of Stage 3 and Stage 4 without stopping.
+change first, then continue to Stage 4 and Stage 5 without stopping.
 
 ## Activate - first use
 
@@ -77,10 +77,10 @@ combination:
 - Explain the signal supporting each path.
 - Explain whether paths should run sequentially, in parallel, or for different audiences.
 
-## What to record for Stage 3
+## What to record for Stage 3 (written into the Skills Map in Stage 4)
 
-Record this in the "Selected Path(s)" section of the Skills Map
-([SKILLS-MAP-TEMPLATE.md](SKILLS-MAP-TEMPLATE.md)) and in the debug log:
+Keep this for the "Selected Path(s)" section of the Skills Map
+([SKILLS-MAP-TEMPLATE.md](SKILLS-MAP-TEMPLATE.md)), and for the debug log when debug is on:
 
 1. Recommended path(s): primary and supporting, with the confirmed signals behind each (by signal
    reference), and the sequencing (sequential, parallel, or by audience).

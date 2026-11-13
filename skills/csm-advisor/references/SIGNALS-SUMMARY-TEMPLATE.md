@@ -12,9 +12,10 @@ What to extract, the signal record fields, and the readiness and blocker rules a
 ## Chat reply (separate from the document)
 
 The detail goes ONLY into the Word document. In chat reply with 2-3 sentences (what was analyzed,
-the single most important finding, and a link to the document) and the stage status, followed by the
-`Debug - Stage 1` and `Debug - Stage 2` blocks from [DEBUG-LOG.md](DEBUG-LOG.md). Do not ask for
-approval or more information - continue straight to Stage 3:
+the single most important finding, and a link to the document) and the stage status. If debug
+logging is on (the request asked for it), add the `Debug - Stage 1` and `Debug - Stage 2` blocks from
+[DEBUG-LOG.md](DEBUG-LOG.md). Do not ask for approval or more information - continue straight to
+Stage 3:
 
 > I analyzed 5 files and 3 Teams meeting recaps for <customer>. The customer outcome is <outcome>;
 > readiness is <Ready with conditions> and <N> items of information are still missing. Full details:
@@ -108,7 +109,8 @@ For each audience group found in the sources:
 - Input types not supplied (from the list in SIGNAL-COLLECTION.md)
 
 ## Appendix - Debug Log
-<Stage 1 - Collection log and Stage 2 - Signal detection log, as step tables per DEBUG-LOG.md:
+<Include ONLY when debug logging is on; otherwise omit this whole section. Stage 1 - Collection log
+and Stage 2 - Signal detection log, as step tables per DEBUG-LOG.md:
 every source with its read result, the Teams recap scope and result, the outcome of Steps 1-5,
 counts by category and confidence, and the document creation result.>
 ```

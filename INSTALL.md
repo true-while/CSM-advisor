@@ -5,14 +5,15 @@ PowerPoint, and Excel files, emails, usage reports, notes, and (if you ask) Team
 into an evidence-based, role-based skilling plan. No technical setup is needed - just download the
 plugin and add it in Cowork.
 
-It runs four stages in one go - it does not stop to ask you questions - and logs debug details at every step:
+It runs five stages in one go and does not stop to ask you questions:
 
 1. **Collect artifacts** - reads your files and optional Teams meeting recaps.
 2. **Detect signals and summarize** - extracts the customer outcome, adoption and usage signals, audiences, readiness, non-skilling blockers, and missing information into a *Signals Summary* Word document. Every signal records its source, date, and confidence (Confirmed, Probable, or Unconfirmed).
-3. **Select the path and map required skills** - recommends Activate, Deepen, Protect, or Convert and Extend (alone or combined) from confirmed signals, then maps every required training skill to Microsoft Learn modules and learning paths from a catalog bundled with the plugin (a snapshot refreshed with each release). The result is a separate *Skills Map* Word document with the catalog links.
-4. **Build the skilling plan** - gives you a *Skilling Paths proposal* Word document: an executive summary and a full internal MTT review by audience, with a measurement plan and a 60-to-90-day review.
+3. **Select the path** - recommends Activate, Deepen, Protect, or Convert and Extend (alone or combined) from confirmed signals.
+4. **Map required skills** - maps every required training skill to Microsoft Learn modules and learning paths from a catalog bundled with the plugin (a snapshot refreshed with each release). The result is a separate *Skills Map* Word document with the catalog links.
+5. **Build the skilling plan** - gives you a *Skilling Paths proposal* Word document: an executive summary and a full internal MTT review by audience, with a measurement plan and a 60-to-90-day review.
 
-Anything missing is listed as missing information or an assumption in the documents instead of being asked about. Each stage's message and each document include a debug log of what was read, searched, and decided.
+Anything missing is listed as missing information or an assumption in the documents instead of being asked about. Debug logging is off by default; add "with debug" to your request to get a debug block with each stage's message and a debug log at the end of each document.
 
 The result is always a **proposal** for MTT and account-stakeholder validation - never an approved plan.
 
@@ -55,10 +56,10 @@ recommend a skilling path: <attach/select the customer files>.
 Include my Teams meeting recaps for <customer> from the last 2 weeks.
 ```
 
-CSM Advisor runs all four stages without stopping to ask questions. Each stage posts a short message
-(2-3 sentences) with a debug block. You get three Word documents: the Signals Summary (Stage 2), the
-Skills Map (Stage 3, required skills mapped to Microsoft Learn catalog items with links), and the
-Skilling Paths proposal (Stage 4). Each document ends with a debug log. If the customer outcome is
+CSM Advisor runs all five stages without stopping to ask questions. Each stage posts a short message
+(2-3 sentences). You get three Word documents: the Signals Summary (Stage 2), the Skills Map (Stage 4,
+required skills mapped to Microsoft Learn catalog items with links), and the Skilling Paths proposal
+(Stage 5). Add "with debug" to the prompt if you also want a debug block and a debug log. If the customer outcome is
 missing, or the main blocker is not a skilling gap, it still finishes and states clearly what is
 missing instead of forcing a recommendation.
 

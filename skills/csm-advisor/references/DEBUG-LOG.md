@@ -1,16 +1,21 @@
-# Debug Logging (all stages)
+# Debug Logging (optional)
 
-Every step of every stage is logged so a CSM or MTT can see what the agent read, did, decided, and
-skipped. Log facts only - never guess - and keep going after warnings or errors.
+Debug logging is **off by default**. Turn it on only when the user's request asks for it (for example
+"with debug", "debug mode", "verbose", or "show your steps"). When it is off, skip everything in this
+file: no debug blocks in chat and no debug appendix in the documents.
+
+When it is on, every step of every stage is logged so a CSM or MTT can see what the agent read, did,
+decided, and skipped. Log facts only - never guess - and keep going after warnings or errors.
 
 ## Where the log goes
 
 1. **Chat:** after each stage, add a compact `Debug - Stage N` block (at most ~8 lines) under that
    stage's short message.
-2. **Word documents:** the Signals Summary, Skills Map, and Skilling Paths proposal each end with an
-   **"Appendix - Debug Log"** section holding the full step table for that stage. Stage 1 has no
-   document of its own, so its full log goes into the Signals Summary appendix under "Stage 1 -
-   Collection log".
+2. **Word documents:** the Signals Summary (Stage 2), Skills Map (Stage 4), and Skilling Paths
+   proposal (Stage 5) each end with an **"Appendix - Debug Log"** section holding the full step table
+   for their stage. Stages 1 and 3 have no document of their own: the Stage 1 log goes into the
+   Signals Summary appendix under "Stage 1 - Collection log", and the Stage 3 log goes into the
+   Skills Map appendix under "Stage 3 - Path selection log".
 
 ## What never goes in a log
 
@@ -24,7 +29,8 @@ skipped. Log facts only - never guess - and keep going after warnings or errors.
 | 1.1 | <what was done> | <what it used> | <count or outcome> | OK / WARN / ERROR / SKIPPED | <reason, fallback, or retry> |
 
 Status meanings: **OK** done as intended; **WARN** done with a gap or fallback; **ERROR** failed and a
-fallback was used or the item was skipped; **SKIPPED** deliberately not done (say why).
+fallback was used or the item was skipped; **SKIPPED** deliberately not done (say why). Number the
+steps by stage (1.1, 1.2, 2.1, ...).
 
 ## What to log per stage
 
@@ -43,9 +49,11 @@ fallback was used or the item was skipped; **SKIPPED** deliberately not done (sa
   information items; contradictions.
 - The Stage 2 status, and the document file name and save location, including any retry.
 
-**Stage 3 - Path selection and skills map**
-- Path selection: for each of Activate, Deepen, Protect, Convert and Extend - matched or not, with
-  the signal ids behind the match - and the final decision (or "no path selected" and why).
+**Stage 3 - Select the path**
+- For each of Activate, Deepen, Protect, Convert and Extend: matched or not, with the signal ids
+  behind the match, and the final decision (or "no path selected" and why).
+
+**Stage 4 - Map required skills**
 - The catalog: file present, `generated_at`, and counts. If the catalog or script failed: the error
   and the fallback used.
 - Every required skill: id, name, the search phrase(s), the exact `search_catalog.py` command or the
@@ -55,7 +63,7 @@ fallback was used or the item was skipped; **SKIPPED** deliberately not done (sa
 - Totals: skills derived, skills covered, partly covered, not covered, distinct catalog items used.
 - The document file name and save location, including any retry.
 
-**Stage 4 - Skilling plan**
+**Stage 5 - Skilling plan**
 - Inputs used (Signals Summary and Skills Map file names).
 - Audiences built, items used per audience, measurement fields that are missing, and any validation
   items raised.
@@ -64,9 +72,8 @@ fallback was used or the item was skipped; **SKIPPED** deliberately not done (sa
 ## Chat block format
 
 ```text
-Debug - Stage 3
+Debug - Stage 4
 - Input: Signals Summary (14 signals); catalog snapshot 2026-11-11 (3458 modules, 834 paths)
-- Path: Deepen (primary), Protect (supporting) - rules matched on S-04, S-07, S-11
 - Skills: 9 derived; 6 covered, 2 partly, 1 not covered; 11 distinct catalog items
 - Search: 9 script calls, 0 errors; no live-search fallback
 - Warnings: skill S9 "<name>" had no strong match
