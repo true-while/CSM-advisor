@@ -85,11 +85,12 @@ function Invoke-Native {
     $text = ($out | ForEach-Object { "$_" }) -join "`n"
     $stdout = ($out | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | ForEach-Object { "$_" }) -join "`n"
     if ($code -ne 0) {
-        if ($AllowFailure) { return $null }
+        if ($AllowFailure) { if ($Capture) { return $null } else { return $false } }
         throw "'$(Split-Path $Exe -Leaf) $($Arguments[0..1] -join ' ')' failed with exit code ${code}:`n$text"
     }
     if ($Capture) { return $stdout.Trim() }   # stdout only: tools such as 'az' print warnings to stderr
     if ($text) { $text -split "`n" | ForEach-Object { Write-Host "    $_" } }
+    if ($AllowFailure) { return $true }
 }
 
 function Get-Json($text) { if ($text) { return $text | ConvertFrom-Json } }
@@ -158,6 +159,15 @@ if (-not $NoAppUpdate) {
                "  1. Publish to a registry the app already uses: ./publish-image.ps1 -Registry <name> (the app pulls from: $((($appRegistries | ForEach-Object { $_.server }) -join ', '))).`n" +
                "  2. Give the app credentials for $server yourself (for example a repository-scoped ACR token), then run this script again:`n" +
                "     az containerapp registry set -n $AppName -g $AppResourceGroup --server $server --username <name> --password <secret>")
+    }
+
+    # The app's current image is often a moving tag such as ":latest" that this run is about to overwrite.
+    # Resolve it to a digest now, so the rollback command still points at the version that is running today.
+    $previousRef = $currentImage
+    if ($currentImage -notmatch '@sha256:' -and $currentImage -match '^([^/]+)/([^:@]+):(.+)$' -and $Matches[1] -eq $server) {
+        $prevRepo = $Matches[2]; $prevTag = $Matches[3]
+        $prevDigest = Invoke-Native az (@("acr", "repository", "show", "-n", $Registry, "--image", "${prevRepo}:$prevTag", "--query", "digest", "-o", "tsv") + (SubArgs $RegistrySubscription)) -Capture -ReadOnly -AllowFailure
+        if ($prevDigest) { $previousRef = "$server/${prevRepo}@$prevDigest"; Info "          that tag currently resolves to $prevDigest (kept for rollback)" }
     }
 }
 
@@ -253,15 +263,15 @@ if ($pullMode -eq "identity") {
     $principalId = Invoke-Native az (@("containerapp", "identity", "assign", "--system-assigned", "--query", "principalId", "-o", "tsv") + $appTarget) -Capture
     $hasRole = Invoke-Native az (@("role", "assignment", "list", "--assignee", $principalId, "--scope", $acr.id, "--role", "AcrPull", "--query", "[0].id", "-o", "tsv") + (SubArgs $RegistrySubscription)) -Capture -ReadOnly -AllowFailure
     if (-not $hasRole -or $DryRun) {
-        Invoke-Native az (@("role", "assignment", "create", "--assignee-object-id", $principalId, "--assignee-principal-type", "ServicePrincipal", "--role", "AcrPull", "--scope", $acr.id) + (SubArgs $RegistrySubscription))
+        Invoke-Native az (@("role", "assignment", "create", "--assignee-object-id", $principalId, "--assignee-principal-type", "ServicePrincipal", "--role", "AcrPull", "--scope", $acr.id, "-o", "none") + (SubArgs $RegistrySubscription))
     }
     else { Info "AcrPull is already assigned to the identity." }
 
     # A new role assignment can take a minute or two to take effect, so retry.
     $configured = $false
     foreach ($attempt in 1..8) {
-        $result = Invoke-Native az (@("containerapp", "registry", "set", "--server", $server, "--identity", "system") + $appTarget) -AllowFailure
-        if ($DryRun -or $null -ne $result -or $LASTEXITCODE -eq 0) { $configured = $true; break }
+        $ok = Invoke-Native az (@("containerapp", "registry", "set", "--server", $server, "--identity", "system", "-o", "none") + $appTarget) -AllowFailure
+        if ($DryRun -or $ok) { $configured = $true; break }
         Info "Role assignment is still propagating (attempt $attempt of 8); waiting 20 seconds"
         Start-Sleep -Seconds 20
     }
@@ -269,7 +279,8 @@ if ($pullMode -eq "identity") {
 }
 
 Info "Switching to $deployRef"
-Invoke-Native az (@("containerapp", "update", "--image", $deployRef) + $appTarget)
+$createdRevision = Invoke-Native az (@("containerapp", "update", "--image", $deployRef, "--query", "properties.latestRevisionName", "-o", "tsv") + $appTarget) -Capture
+Info "update accepted; latest revision: $createdRevision"
 
 if ($DryRun) { Write-Host "`nDry run finished: nothing was built, pushed or changed." -ForegroundColor Yellow; return }
 
@@ -289,7 +300,7 @@ while ((Get-Date) -lt $deadline) {
 if (-not $healthy) {
     throw ("The new revision '$newRevision' did not become healthy. In Single revision mode the previous revision '$oldRevision' keeps serving traffic.`n" +
            "Look at the startup logs: az containerapp logs show -n $AppName -g $AppResourceGroup --type system`n" +
-           "Roll back or retry: az containerapp update -n $AppName -g $AppResourceGroup --image $currentImage")
+           "Roll back or retry: az containerapp update -n $AppName -g $AppResourceGroup --image $previousRef")
 }
 
 Step "Checking the running app"
@@ -318,6 +329,6 @@ Write-Host "`nDeployed." -ForegroundColor Green
 Info "app:       $AppName ($AppResourceGroup)"
 Info "revision:  $newRevision (previous: $oldRevision)"
 Info "image:     $deployRef"
-Info "was:       $currentImage"
+Info "was:       $currentImage$(if ($previousRef -ne $currentImage) { "  (resolved to $previousRef before this run moved the tag)" })"
 if ($fqdn) { Info "url:       https://$fqdn" }
-Info "roll back: az containerapp update -n $AppName -g $AppResourceGroup --image $currentImage"
+Info "roll back: az containerapp update -n $AppName -g $AppResourceGroup --image $previousRef"

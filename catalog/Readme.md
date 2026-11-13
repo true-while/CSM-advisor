@@ -148,7 +148,9 @@ What it does, in order:
 4. **Updates the app to the image digest** (`<server>/csm-learn-catalog@sha256:...`), so a later `latest`
    push cannot change what is running. It waits for the new revision to be healthy, then calls the app's
    `/health` and `/meta` and checks that it is serving the catalog downloaded by this run.
-5. **Prints the previous image** and the command to roll back to it.
+5. **Prints the previous image** and the command to roll back to it. A moving tag such as `latest` is
+   resolved to its digest before the push, because this run moves the tag; the rollback command uses
+   the digest.
 
 In Single revision mode the previous revision keeps serving traffic until the new one is healthy, so an
 image that fails to start does not take the app down.
