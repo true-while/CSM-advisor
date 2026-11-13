@@ -120,30 +120,66 @@ header. Then open <http://localhost:8000/docs>.
 Publish the port on `127.0.0.1` as shown. With Podman on Windows, a plain `-p 8000:8000` also listens
 on IPv6, and browsers that try `localhost` over IPv6 first get `ERR_EMPTY_RESPONSE`.
 
-## Deploy to Azure Container Apps
+## Publish the image to Azure Container Registry
 
-Not yet deployed. These commands use `az containerapp up`, which builds the image from the Dockerfile in
-Azure Container Registry and creates the environment and the app. Run them from this folder after
-`az login`:
+[deploy/publish-image.ps1](deploy/publish-image.ps1) builds the image and pushes it to the registry
+`msftagentacryqjcqtaqoecly` (override with `-Registry`). Run `az login` first; your account needs the
+AcrPush role on the registry (Owner and Contributor also work).
 
 ```powershell
-az group create -n rg-csm-catalog -l eastus
-az containerapp up -n csm-learn-catalog -g rg-csm-catalog -l eastus --source . --ingress external --target-port 8000
-
-# Require an API key on every call except /health (the app is open until this is done)
-az containerapp secret set -n csm-learn-catalog -g rg-csm-catalog --secrets api-key=<choose-a-long-random-value>
-az containerapp update -n csm-learn-catalog -g rg-csm-catalog --set-env-vars API_KEY=secretref:api-key --cpu 0.5 --memory 1.0Gi --min-replicas 1
+./deploy/publish-image.ps1                 # build with Docker or Podman, push <yyyyMMdd>-<git sha> and latest
+./deploy/publish-image.ps1 -Tag 1.0.0 -NoLatest
+./deploy/publish-image.ps1 -UseAcrBuild    # build inside the registry; no local container runtime needed
+./deploy/publish-image.ps1 -DryRun         # print every step without running it
 ```
 
-Then call it with the header `x-api-key: <value>`. Set the probes to `GET /health` on port 8000. The
-catalog is public Microsoft Learn data; the key only stops other people from using your capacity
-(`/docs` and `/openapi.json` stay readable).
+What it does:
+
+- Signs in with a short-lived Microsoft Entra token. The registry's admin user stays disabled and no
+  password is stored.
+- Builds with a new `CATALOG_REFRESH` build argument each run, so the image always contains a freshly
+  downloaded catalog instead of one cached from an earlier build.
+- Pushes an immutable tag (`<yyyyMMdd>-<git sha>`, with `-dirty` if the folder has uncommitted changes)
+  and, unless `-NoLatest` is given, `latest`. It refuses to overwrite an existing tag.
+- Verifies the image in the registry and prints its digest. Deploy by digest
+  (`<server>/csm-learn-catalog@sha256:...`) so a later `latest` cannot change what is running.
+
+The repository is `csm-learn-catalog`. Other repositories in the registry are not touched.
+
+## Deploy to Azure Container Apps
+
+Not yet deployed. After publishing, create the app from the registry image. A user-assigned managed
+identity with the AcrPull role lets the app pull without a password. These commands have not been run;
+check the names and the region first.
+
+```powershell
+$acr = "msftagentacryqjcqtaqoecly"; $rg = "<resource-group>"; $loc = "<region>"
+$digest = "<digest printed by publish-image.ps1>"
+
+az identity create -n id-csm-catalog -g $rg -l $loc
+$idId  = az identity show -n id-csm-catalog -g $rg --query id -o tsv
+$idPid = az identity show -n id-csm-catalog -g $rg --query principalId -o tsv
+az role assignment create --assignee-object-id $idPid --assignee-principal-type ServicePrincipal `
+  --role AcrPull --scope (az acr show -n $acr --query id -o tsv)
+
+az containerapp env create -n cae-csm-catalog -g $rg -l $loc
+az containerapp create -n csm-learn-catalog -g $rg --environment cae-csm-catalog `
+  --image "$acr.azurecr.io/csm-learn-catalog@$digest" `
+  --user-assigned $idId --registry-server "$acr.azurecr.io" --registry-identity $idId `
+  --ingress external --target-port 8000 --cpu 0.5 --memory 1.0Gi --min-replicas 1 `
+  --secrets api-key=<choose-a-long-random-value> --env-vars API_KEY=secretref:api-key
+```
+
+Call it with the header `x-api-key: <value>`. Set the probes to `GET /health` on port 8000. The catalog
+is public Microsoft Learn data; the key only stops other people from using your capacity (`/docs`,
+`/openapi.json` and `/health` stay readable). To deploy a newer image later, run
+`az containerapp update -n csm-learn-catalog -g $rg --image "$acr.azurecr.io/csm-learn-catalog@<new digest>"`.
 
 ### Keeping the catalog current
 
 The catalog is fixed when the image is built. Microsoft refreshes the source at least daily, so run
-`az containerapp up ... --source .` again (for example from a weekly scheduled job) to pick up new
-content. The public catalog endpoint is planned for deprecation by Microsoft; if it stops working the
+`publish-image.ps1` again (for example from a weekly scheduled job) and update the app to the new
+digest. The public catalog endpoint is planned for deprecation by Microsoft; if it stops working the
 build fails instead of shipping an incomplete catalog.
 
 ## Using it from Cowork
