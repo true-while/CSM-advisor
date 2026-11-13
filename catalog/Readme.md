@@ -120,67 +120,73 @@ header. Then open <http://localhost:8000/docs>.
 Publish the port on `127.0.0.1` as shown. With Podman on Windows, a plain `-p 8000:8000` also listens
 on IPv6, and browsers that try `localhost` over IPv6 first get `ERR_EMPTY_RESPONSE`.
 
-## Publish the image to Azure Container Registry
+## Publish the image and update the Container App
 
-[deploy/publish-image.ps1](deploy/publish-image.ps1) builds the image and pushes it to the registry
-`msftagentacryqjcqtaqoecly` (override with `-Registry`). Run `az login` first; your account needs the
-AcrPush role on the registry (Owner and Contributor also work).
+[deploy/publish-image.ps1](deploy/publish-image.ps1) builds the image, pushes it to an Azure Container
+Registry, and updates the Container App `learn-catalog` (resource group `alex-app-containers`) to the new
+version. Run `az login` first. You need AcrPush on the registry and Contributor on the app.
 
 ```powershell
-./deploy/publish-image.ps1                 # build with Docker or Podman, push <yyyyMMdd>-<git sha> and latest
+./deploy/publish-image.ps1                         # publish to msftagentacryqjcqtaqoecly and update the app
+./deploy/publish-image.ps1 -Registry eshopacr      # publish to the registry the app already pulls from
+./deploy/publish-image.ps1 -NoAppUpdate            # publish only
+./deploy/publish-image.ps1 -DryRun                 # read-only checks, then print every step
 ./deploy/publish-image.ps1 -Tag 1.0.0 -NoLatest
-./deploy/publish-image.ps1 -UseAcrBuild    # build inside the registry; no local container runtime needed
-./deploy/publish-image.ps1 -DryRun         # print every step without running it
+./deploy/publish-image.ps1 -UseAcrBuild            # build inside the registry; no local container runtime
+./deploy/publish-image.ps1 -AppName <app> -AppResourceGroup <rg> -AppSubscription <id> -RegistrySubscription <id>
 ```
 
-What it does:
+What it does, in order:
 
-- Signs in with a short-lived Microsoft Entra token. The registry's admin user stays disabled and no
-  password is stored.
-- Builds with a new `CATALOG_REFRESH` build argument each run, so the image always contains a freshly
-  downloaded catalog instead of one cached from an earlier build.
-- Pushes an immutable tag (`<yyyyMMdd>-<git sha>`, with `-dirty` if the folder has uncommitted changes)
-  and, unless `-NoLatest` is given, `latest`. It refuses to overwrite an existing tag.
-- Verifies the image in the registry and prints its digest. Deploy by digest
-  (`<server>/csm-learn-catalog@sha256:...`) so a later `latest` cannot change what is running.
+1. **Preflight (read-only, before building).** Finds the registry and the app and decides how the app
+   will pull the image (see below). It stops here if the app cannot pull, so a long build is not wasted.
+2. **Builds** with Docker or Podman, with a new `CATALOG_REFRESH` build argument each run so the image
+   contains a freshly downloaded catalog instead of one cached from an earlier build.
+3. **Signs in** with a short-lived Microsoft Entra token (the registry's admin user stays disabled and no
+   password is stored) and **pushes** an immutable tag (`<yyyyMMdd>-<git sha>`, with `-dirty` if the folder
+   has uncommitted changes) and, unless `-NoLatest` is given, `latest`. It refuses to overwrite a tag.
+4. **Updates the app to the image digest** (`<server>/csm-learn-catalog@sha256:...`), so a later `latest`
+   push cannot change what is running. It waits for the new revision to be healthy, then calls the app's
+   `/health` and `/meta` and checks that it is serving the catalog downloaded by this run.
+5. **Prints the previous image** and the command to roll back to it.
+
+In Single revision mode the previous revision keeps serving traffic until the new one is healthy, so an
+image that fails to start does not take the app down.
+
+### How the app pulls from the registry
+
+| Situation | What the script does |
+|-----------|----------------------|
+| The app already has credentials for the registry | Uses them as they are |
+| Not configured, and the app and the registry are in the same Microsoft Entra tenant | Enables the app's system-assigned managed identity, grants it **AcrPull** on the registry, and configures the app to use it. Needs permission to create role assignments (Owner or User Access Administrator). A new role assignment can take a minute or two, so the script retries |
+| Not configured, and they are in different tenants | Stops before building. A managed identity cannot be granted access across tenants. Publish to a registry the app already pulls from (`-Registry`), or give the app credentials for the registry first (`az containerapp registry set ... --username ... --password ...`) |
+
+The script selects subscriptions per command (`--subscription`) and does not change your default Azure
+CLI subscription. Use `-RegistrySubscription` and `-AppSubscription` if the two are in different
+subscriptions. The Azure CLI must be signed in to every tenant involved.
 
 The repository is `csm-learn-catalog`. Other repositories in the registry are not touched.
 
-## Deploy to Azure Container Apps
+### Creating the app from scratch
 
-Not yet deployed. After publishing, create the app from the registry image. A user-assigned managed
-identity with the AcrPull role lets the app pull without a password. These commands have not been run;
-check the names and the region first.
+The script updates an existing app. To create one, use `az containerapp create` with ingress on port 8000,
+for example with an API key (clients then send the header `x-api-key`; `/health` stays open):
 
 ```powershell
-$acr = "msftagentacryqjcqtaqoecly"; $rg = "<resource-group>"; $loc = "<region>"
-$digest = "<digest printed by publish-image.ps1>"
-
-az identity create -n id-csm-catalog -g $rg -l $loc
-$idId  = az identity show -n id-csm-catalog -g $rg --query id -o tsv
-$idPid = az identity show -n id-csm-catalog -g $rg --query principalId -o tsv
-az role assignment create --assignee-object-id $idPid --assignee-principal-type ServicePrincipal `
-  --role AcrPull --scope (az acr show -n $acr --query id -o tsv)
-
-az containerapp env create -n cae-csm-catalog -g $rg -l $loc
-az containerapp create -n csm-learn-catalog -g $rg --environment cae-csm-catalog `
-  --image "$acr.azurecr.io/csm-learn-catalog@$digest" `
-  --user-assigned $idId --registry-server "$acr.azurecr.io" --registry-identity $idId `
-  --ingress external --target-port 8000 --cpu 0.5 --memory 1.0Gi --min-replicas 1 `
+az containerapp create -n <app> -g <rg> --environment <environment> `
+  --image "<registry>.azurecr.io/csm-learn-catalog:latest" --registry-server "<registry>.azurecr.io" `
+  --registry-identity system --ingress external --target-port 8000 --cpu 0.5 --memory 1.0Gi --min-replicas 1 `
   --secrets api-key=<choose-a-long-random-value> --env-vars API_KEY=secretref:api-key
 ```
 
-Call it with the header `x-api-key: <value>`. Set the probes to `GET /health` on port 8000. The catalog
-is public Microsoft Learn data; the key only stops other people from using your capacity (`/docs`,
-`/openapi.json` and `/health` stay readable). To deploy a newer image later, run
-`az containerapp update -n csm-learn-catalog -g $rg --image "$acr.azurecr.io/csm-learn-catalog@<new digest>"`.
+Then grant the app's identity AcrPull on the registry, as described above.
 
 ### Keeping the catalog current
 
 The catalog is fixed when the image is built. Microsoft refreshes the source at least daily, so run
-`publish-image.ps1` again (for example from a weekly scheduled job) and update the app to the new
-digest. The public catalog endpoint is planned for deprecation by Microsoft; if it stops working the
-build fails instead of shipping an incomplete catalog.
+`publish-image.ps1` again (for example from a weekly scheduled job) to publish a new image and update the
+app. The public catalog endpoint is planned for deprecation by Microsoft; if it stops working the build
+fails instead of shipping an incomplete catalog.
 
 ## Using it from Cowork
 
