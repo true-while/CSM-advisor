@@ -12,8 +12,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
 
 # The catalog is downloaded when the image is built, so the running service makes no outbound calls.
-# The build fails if the download is incomplete. Rebuild the image to refresh the catalog.
-RUN python -m app.fetch "$CATALOG_PATH"
+# The build fails if the download is incomplete. Changing CATALOG_REFRESH (deploy/publish-image.ps1 sets
+# it on every run) forces a fresh download instead of reusing a cached layer. Rebuild to refresh the catalog.
+ARG CATALOG_REFRESH=manual
+RUN echo "catalog refresh: ${CATALOG_REFRESH}" && python -m app.fetch "$CATALOG_PATH"
 
 RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin appuser
 USER appuser

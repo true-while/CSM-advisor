@@ -51,8 +51,9 @@ function Invoke-Native {
         $code = $LASTEXITCODE
     } finally { $ErrorActionPreference = $prev }
     $text = ($out | ForEach-Object { "$_" }) -join "`n"
+    $stdout = ($out | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | ForEach-Object { "$_" }) -join "`n"
     if ($code -ne 0) { throw "'$(Split-Path $Exe -Leaf) $($Arguments[0])' failed with exit code ${code}:`n$text" }
-    if ($Capture) { return $text.Trim() }
+    if ($Capture) { return $stdout.Trim() }   # stdout only: tools such as 'az' print warnings to stderr
     if ($text) { $text -split "`n" | ForEach-Object { Write-Host "    $_" } }
 }
 
@@ -110,9 +111,12 @@ if ($Tag -ne "latest" -and -not $DryRun) {
 # ---------------------------------------------------------------- Build and push
 $labels = @("org.opencontainers.image.title=csm-learn-catalog",
             "org.opencontainers.image.created=$((Get-Date).ToUniversalTime().ToString('s'))Z")
+# A new value every run invalidates the Dockerfile layer that downloads the catalog, so the image
+# always contains a fresh catalog instead of one cached from an earlier build.
+$refresh = (Get-Date).ToUniversalTime().ToString("yyyyMMddHHmmss")
 if ($UseAcrBuild) {
     Step "Building in the registry with ACR Tasks (no local container runtime needed)"
-    $buildArgs = @("acr", "build", "-r", $Registry, "-t", "${Repository}:$Tag")
+    $buildArgs = @("acr", "build", "-r", $Registry, "-t", "${Repository}:$Tag", "--build-arg", "CATALOG_REFRESH=$refresh")
     if (-not $NoLatest) { $buildArgs += @("-t", "${Repository}:latest") }
     foreach ($l in $labels) { $buildArgs += @("--image-label", $l) }
     $buildArgs += $contextDir
@@ -122,7 +126,7 @@ else {
     $rt = Find-Runtime
     if (-not $rt) { throw "No container runtime found. Install Docker or Podman, or re-run with -UseAcrBuild." }
     Step "Building the image with $($rt.Name)"
-    $buildArgs = @("build", "-t", $image)
+    $buildArgs = @("build", "-t", $image, "--build-arg", "CATALOG_REFRESH=$refresh")
     if (-not $NoLatest) { $buildArgs += @("-t", $latest) }
     foreach ($l in $labels) { $buildArgs += @("--label", $l) }
     $buildArgs += $contextDir
@@ -130,6 +134,7 @@ else {
 
     Step "Signing in to $server with an Entra token"
     $token = Invoke-Native az @("acr", "login", "-n", $Registry, "--expose-token", "--output", "tsv", "--query", "accessToken") -Capture
+    if (-not $DryRun -and $token -notmatch '^[\w-]+\.[\w-]+\.[\w-]+$') { throw "Could not get a registry access token from 'az acr login --expose-token'." }
     Invoke-Native $rt.Path @("login", $server, "--username", "00000000-0000-0000-0000-000000000000", "--password-stdin") -StdIn $token
 
     Step "Pushing"
