@@ -127,10 +127,11 @@ Registry, and updates the Container App `learn-catalog` (resource group `alex-ap
 version. Run `az login` first. You need AcrPush on the registry and Contributor on the app.
 
 ```powershell
-./deploy/publish-image.ps1                         # publish to msftagentacryqjcqtaqoecly and update the app
-./deploy/publish-image.ps1 -Registry eshopacr      # publish to the registry the app already pulls from
-./deploy/publish-image.ps1 -NoAppUpdate            # publish only
+./deploy/publish-image.ps1                         # build, publish, and deploy to the app (registry = the one the app pulls from)
 ./deploy/publish-image.ps1 -DryRun                 # read-only checks, then print every step
+./deploy/publish-image.ps1 -NoAppUpdate -Registry <name>   # publish only
+./deploy/publish-image.ps1 -Registry <name>        # publish to another registry (the app must be able to pull from it)
+./deploy/publish-image.ps1 -NoParamUpdate          # do not write the new digest into main.bicepparam
 ./deploy/publish-image.ps1 -Tag 1.0.0 -NoLatest
 ./deploy/publish-image.ps1 -UseAcrBuild            # build inside the registry; no local container runtime
 ./deploy/publish-image.ps1 -AppName <app> -AppResourceGroup <rg> -AppSubscription <id> -RegistrySubscription <id>
@@ -138,8 +139,9 @@ version. Run `az login` first. You need AcrPush on the registry and Contributor 
 
 What it does, in order:
 
-1. **Preflight (read-only, before building).** Finds the registry and the app and decides how the app
-   will pull the image (see below). It stops here if the app cannot pull, so a long build is not wasted.
+1. **Preflight (read-only, before building).** Reads the app, takes the registry from it (unless `-Registry`
+   is given), and decides how the app will pull the image (see below). It stops here if the app cannot pull,
+   so a long build is not wasted.
 2. **Builds** with Docker or Podman, with a new `CATALOG_REFRESH` build argument each run so the image
    contains a freshly downloaded catalog instead of one cached from an earlier build.
 3. **Signs in** with a short-lived Microsoft Entra token (the registry's admin user stays disabled and no
@@ -148,7 +150,10 @@ What it does, in order:
 4. **Updates the app to the image digest** (`<server>/csm-learn-catalog@sha256:...`), so a later `latest`
    push cannot change what is running. It waits for the new revision to be healthy, then calls the app's
    `/health` and `/meta` and checks that it is serving the catalog downloaded by this run.
-5. **Prints the previous image** and the command to roll back to it. A moving tag such as `latest` is
+5. **Updates [deploy/main.bicepparam](deploy/main.bicepparam)** with the new digest, so a later redeploy of the
+   Bicep template does not roll the app back. It only does this when the file is for the same app and
+   registry, and only after the new revision is healthy. Commit the change. Use `-NoParamUpdate` to skip it.
+6. **Prints the previous image** and the command to roll back to it. A moving tag such as `latest` is
    resolved to its digest before the push, because this run moves the tag; the rollback command uses
    the digest.
 
@@ -159,8 +164,8 @@ image that fails to start does not take the app down.
 
 | Situation | What the script does |
 |-----------|----------------------|
-| The app already has credentials for the registry | Uses them as they are |
-| Not configured, and the app and the registry are in the same Microsoft Entra tenant | Enables the app's system-assigned managed identity, grants it **AcrPull** on the registry, and configures the app to use it. Needs permission to create role assignments (Owner or User Access Administrator). A new role assignment can take a minute or two, so the script retries |
+| The app already has access to the registry (for example an app deployed with [deploy/main.bicep](deploy/main.bicep), which pulls with a user-assigned managed identity) | Keeps it as it is |
+| Not configured, and the app and the registry are in the same Microsoft Entra tenant | Uses the app's user-assigned managed identity (if it has exactly one) or enables its system-assigned identity, grants it **AcrPull** on the registry, and configures the app to use it. Needs permission to create role assignments (Owner or User Access Administrator). A new role assignment can take a minute or two, so the script retries |
 | Not configured, and they are in different tenants | Stops before building. A managed identity cannot be granted access across tenants. Publish to a registry the app already pulls from (`-Registry`), or give the app credentials for the registry first (`az containerapp registry set ... --username ... --password ...`) |
 
 The script selects subscriptions per command (`--subscription`) and does not change your default Azure
@@ -206,9 +211,11 @@ az deployment group create  -g <resource-group> -f main.bicep -p main.bicepparam
 
 The deployment prints the `url`. To deploy a different image, pass it on the command line
 (`-p image=<registry>.azurecr.io/csm-learn-catalog@sha256:...`); `publish-image.ps1` prints the digest.
-`publish-image.ps1` updates the running app directly, so if you later redeploy the template, give it the digest
-that is currently running (`az containerapp show -n <app> -g <rg> --query properties.template.containers[0].image`),
-or it will go back to the digest in the parameter file.
+`publish-image.ps1` updates the running app directly and then writes the new digest into `main.bicepparam`
+(commit it), so redeploying the template keeps the version the script deployed. If you used `-NoParamUpdate`,
+or the file is not committed, give the template the digest that is currently running
+(`az containerapp show -n <app> -g <rg> --query properties.template.containers[0].image`), or it will go back
+to the digest in the parameter file.
 
 **First-time deployment** into a resource group that has no environment: add `-p createEnvironment=true`. The
 template then creates the environment (and a Log Analytics workspace) and the URL's domain is generated at that

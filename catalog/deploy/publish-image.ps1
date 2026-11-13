@@ -14,13 +14,21 @@
     4. Updates the Container App to the pushed image BY DIGEST, waits for the new revision to become healthy,
        and checks the app's /health and /meta endpoints. In Single revision mode the previous revision keeps
        serving traffic until the new one is healthy, so a bad image does not take the app down.
-    5. Prints the previous image and the command to roll back to it.
+    5. Keeps deploy/main.bicepparam in sync: writes the deployed image digest into its `image` parameter, so a later
+       redeploy of the Bicep template does not roll the app back. Skip with -NoParamUpdate. Commit the change.
+    6. Prints the previous image and the command to roll back to it.
+
+    Which registry: by default the one the app already pulls from (-Registry overrides it). With -NoAppUpdate there
+    is no app to read it from, so -Registry is required.
 
     How the app pulls from the registry:
-      - The app already has credentials for the registry         -> they are used as they are.
-      - Not configured, and the app and registry share a tenant   -> the script enables the app's system-assigned
-                                                                      identity, grants it AcrPull on the registry,
-                                                                      and configures the app to use it.
+      - The app already has credentials for the registry         -> they are used as they are (this is the normal case
+                                                                      for an app deployed with deploy/main.bicep, which
+                                                                      pulls with a user-assigned managed identity).
+      - Not configured, and the app and registry share a tenant   -> the script uses the app's user-assigned managed
+                                                                      identity (if it has exactly one) or enables its
+                                                                      system-assigned identity, grants it AcrPull on
+                                                                      the registry, and configures the app to use it.
       - Not configured, and they are in different tenants          -> the script stops before building. A managed
                                                                       identity cannot be granted access across
                                                                       tenants. Use a registry the app already pulls
@@ -33,10 +41,11 @@
 
 .EXAMPLE
     ./publish-image.ps1
+    Builds, publishes to the registry the app pulls from, and updates the app.
 .EXAMPLE
     ./publish-image.ps1 -Registry eshopacr
 .EXAMPLE
-    ./publish-image.ps1 -NoAppUpdate
+    ./publish-image.ps1 -NoAppUpdate -Registry eshopacr
 .EXAMPLE
     ./publish-image.ps1 -DryRun
 .EXAMPLE
@@ -44,7 +53,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string] $Registry = "msftagentacryqjcqtaqoecly",
+    [string] $Registry,
     [Alias("Subscription")] [string] $RegistrySubscription,
     [string] $Repository = "csm-learn-catalog",
     [string] $Tag,
@@ -57,6 +66,9 @@ param(
     [string] $AppSubscription,
     [switch] $NoAppUpdate,
     [ValidateRange(1, 60)] [int] $TimeoutMinutes = 8,
+
+    [string] $ParamFile = (Join-Path $PSScriptRoot "main.bicepparam"),
+    [switch] $NoParamUpdate,
 
     [switch] $DryRun
 )
@@ -109,12 +121,54 @@ function Find-Runtime {
     return $null
 }
 
+# Rewrites `param image = '...'` in the Bicep parameter file, but only when the file is for this app and registry.
+function Update-ParamFile {
+    param([string] $Path, [string] $NewImage, [string] $AppName, [string] $RegistryName, [switch] $WhatIf)
+    if (-not (Test-Path $Path)) { return "skipped: $Path does not exist" }
+    $text = [System.IO.File]::ReadAllText($Path)
+    if ($text -notmatch "(?m)^\s*param\s+appName\s*=\s*'$([regex]::Escape($AppName))'") { return "skipped: the file is not for app '$AppName'" }
+    if ($text -notmatch "(?m)^\s*param\s+registryName\s*=\s*'$([regex]::Escape($RegistryName))'") { return "skipped: the file does not use registry '$RegistryName'" }
+    $pattern = "(?m)^(\s*param\s+image\s*=\s*')[^']*(')"
+    if ($text -notmatch $pattern) { return "skipped: no `param image = '...'` line found" }
+    if ($text -match "(?m)^\s*param\s+image\s*=\s*'$([regex]::Escape($NewImage))'") { return "already up to date" }
+    if ($WhatIf) { return "would update" }
+    $updated = [regex]::Replace($text, $pattern, { param($m) $m.Groups[1].Value + $NewImage + $m.Groups[2].Value }, 1)
+    [System.IO.File]::WriteAllText($Path, $updated, (New-Object System.Text.UTF8Encoding $false))
+    return "updated"
+}
+
 # ================================================================ 1. Preflight
-Step "Preflight: Azure sign-in, registry '$Registry'$(if (-not $NoAppUpdate) { ", app '$AppName'" })"
+Step "Preflight: Azure sign-in$(if ($Registry) { ", registry '$Registry'" })$(if (-not $NoAppUpdate) { ", app '$AppName'" })"
 if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Azure CLI ('az') was not found. Install it from https://aka.ms/installazurecli" }
 $me = Get-Json (Invoke-Native az @("account", "show", "--query", "{user:user.name,tenant:tenantId,subscription:name}", "-o", "json") -Capture -ReadOnly -AllowFailure)
 if (-not $me) { throw "Not signed in to the Azure CLI. Run 'az login' first." }
 Info "signed in as $($me.user)  (default subscription '$($me.subscription)', tenant $($me.tenant))"
+
+# The app is read first, because by default the registry is the one the app already pulls from.
+$app = $null
+if (-not $NoAppUpdate) {
+    $appJson = Invoke-Native az (@("containerapp", "show", "-n", $AppName, "-g", $AppResourceGroup, "-o", "json") + (SubArgs $AppSubscription)) -Capture -ReadOnly -AllowFailure
+    if (-not $appJson) { throw "Container App '$AppName' was not found in resource group '$AppResourceGroup'. Check -AppName, -AppResourceGroup and -AppSubscription, and that 'az' is signed in to the tenant the app is in." }
+    $app = Get-Json $appJson
+    $appSubscription = SubscriptionOf $app.id
+    $appTenant = Invoke-Native az @("account", "show", "--subscription", $appSubscription, "--query", "tenantId", "-o", "tsv") -Capture -ReadOnly -AllowFailure
+    $appRegistries = @($app.properties.configuration.registries | Where-Object { $_ })
+    $currentImage = $app.properties.template.containers[0].image
+    $fqdn = $app.properties.configuration.ingress.fqdn
+    Info "app:      $($app.name)  ($($app.location), subscription $appSubscription, tenant $appTenant)"
+    Info "          revision mode $($app.properties.configuration.activeRevisionsMode), current image $currentImage"
+    Info "          pulls from: $((($appRegistries | ForEach-Object { $_.server }) -join ', ') -replace '^$', '(no registry configured)')"
+}
+
+if (-not $Registry) {
+    if ($NoAppUpdate) { throw "-Registry is required with -NoAppUpdate: there is no app to take the registry from." }
+    if ($appRegistries.Count -ne 1) {
+        throw "Cannot choose the registry: the app pulls from $($appRegistries.Count) registries. Pass -Registry <name>."
+    }
+    if ($appRegistries[0].server -notmatch '^([^.]+)\.azurecr\.') { throw "The app's registry '$($appRegistries[0].server)' is not an Azure Container Registry. Pass -Registry <name>." }
+    $Registry = $Matches[1]
+    Info "registry: '$Registry' (the one the app already pulls from; pass -Registry to use another)"
+}
 
 $acrJson = Invoke-Native az (@("acr", "show", "-n", $Registry, "-o", "json") + (SubArgs $RegistrySubscription)) -Capture -ReadOnly -AllowFailure
 if (-not $acrJson) {
@@ -129,27 +183,27 @@ $acrSubscription = SubscriptionOf $acr.id
 $acrTenant = Invoke-Native az @("account", "show", "--subscription", $acrSubscription, "--query", "tenantId", "-o", "tsv") -Capture -ReadOnly -AllowFailure
 Info "registry: $server  (subscription $acrSubscription, tenant $acrTenant, SKU $($acr.sku.name))"
 
-$pullMode = "none"; $app = $null
+$pullMode = "none"; $pullIdentity = $null; $pullPrincipal = $null
 if (-not $NoAppUpdate) {
-    $appJson = Invoke-Native az (@("containerapp", "show", "-n", $AppName, "-g", $AppResourceGroup, "-o", "json") + (SubArgs $AppSubscription)) -Capture -ReadOnly -AllowFailure
-    if (-not $appJson) { throw "Container App '$AppName' was not found in resource group '$AppResourceGroup'. Check -AppName, -AppResourceGroup and -AppSubscription." }
-    $app = Get-Json $appJson
-    $appSubscription = SubscriptionOf $app.id
-    $appTenant = Invoke-Native az @("account", "show", "--subscription", $appSubscription, "--query", "tenantId", "-o", "tsv") -Capture -ReadOnly -AllowFailure
-    $appRegistries = @($app.properties.configuration.registries)
-    $currentImage = $app.properties.template.containers[0].image
-    $fqdn = $app.properties.configuration.ingress.fqdn
-    Info "app:      $($app.name)  ($($app.location), subscription $appSubscription, tenant $appTenant)"
-    Info "          revision mode $($app.properties.configuration.activeRevisionsMode), current image $currentImage"
-    Info "          pulls from: $((($appRegistries | ForEach-Object { $_.server }) -join ', ') -replace '^$', '(no registry configured)')"
+    $userIdentities = @()
+    if ($app.identity -and $app.identity.userAssignedIdentities) { $userIdentities = @($app.identity.userAssignedIdentities.PSObject.Properties) }
+    $registryEntry = $appRegistries | Where-Object { $_.server -eq $server } | Select-Object -First 1
 
-    if ($appRegistries | Where-Object { $_.server -eq $server }) {
+    if ($registryEntry) {
         $pullMode = "existing"
-        Info "pull path: the app already has credentials for $server - they will be used."
+        $how = if ($registryEntry.identity) { "managed identity $(($registryEntry.identity -split '/')[-1])" } elseif ($registryEntry.username) { "the stored credentials for '$($registryEntry.username)'" } else { "its configured access" }
+        Info "pull path: the app already pulls from $server with $how - that is kept."
     }
     elseif ($appTenant -and $acrTenant -and $appTenant -eq $acrTenant) {
         $pullMode = "identity"
-        Info "pull path: the app is not configured for $server. It will use its system-assigned managed identity with the AcrPull role."
+        if ($userIdentities.Count -eq 1) {
+            $pullIdentity = $userIdentities[0].Name; $pullPrincipal = $userIdentities[0].Value.principalId
+            Info "pull path: the app is not configured for $server. It will use its user-assigned managed identity '$(($pullIdentity -split '/')[-1])' with the AcrPull role."
+        }
+        else {
+            $pullIdentity = "system"
+            Info "pull path: the app is not configured for $server. It will use its system-assigned managed identity with the AcrPull role."
+        }
     }
     else {
         throw ("The Container App '$AppName' cannot pull from '$server':`n" +
@@ -259,18 +313,21 @@ $appTarget = @("-n", $AppName, "-g", $AppResourceGroup) + $appSub
 $oldRevision = $app.properties.latestRevisionName
 
 if ($pullMode -eq "identity") {
-    Info "Setting up pull access with the app's system-assigned managed identity"
-    $principalId = Invoke-Native az (@("containerapp", "identity", "assign", "--system-assigned", "--query", "principalId", "-o", "tsv") + $appTarget) -Capture
-    $hasRole = Invoke-Native az (@("role", "assignment", "list", "--assignee", $principalId, "--scope", $acr.id, "--role", "AcrPull", "--query", "[0].id", "-o", "tsv") + (SubArgs $RegistrySubscription)) -Capture -ReadOnly -AllowFailure
+    if ($pullIdentity -eq "system") {
+        Info "Setting up pull access with the app's system-assigned managed identity"
+        $pullPrincipal = Invoke-Native az (@("containerapp", "identity", "assign", "--system-assigned", "--query", "principalId", "-o", "tsv") + $appTarget) -Capture
+    }
+    else { Info "Setting up pull access with the app's user-assigned managed identity" }
+    $hasRole = Invoke-Native az (@("role", "assignment", "list", "--assignee", $pullPrincipal, "--scope", $acr.id, "--role", "AcrPull", "--query", "[0].id", "-o", "tsv") + (SubArgs $RegistrySubscription)) -Capture -ReadOnly -AllowFailure
     if (-not $hasRole -or $DryRun) {
-        Invoke-Native az (@("role", "assignment", "create", "--assignee-object-id", $principalId, "--assignee-principal-type", "ServicePrincipal", "--role", "AcrPull", "--scope", $acr.id, "-o", "none") + (SubArgs $RegistrySubscription))
+        Invoke-Native az (@("role", "assignment", "create", "--assignee-object-id", $pullPrincipal, "--assignee-principal-type", "ServicePrincipal", "--role", "AcrPull", "--scope", $acr.id, "-o", "none") + (SubArgs $RegistrySubscription))
     }
     else { Info "AcrPull is already assigned to the identity." }
 
     # A new role assignment can take a minute or two to take effect, so retry.
     $configured = $false
     foreach ($attempt in 1..8) {
-        $ok = Invoke-Native az (@("containerapp", "registry", "set", "--server", $server, "--identity", "system", "-o", "none") + $appTarget) -AllowFailure
+        $ok = Invoke-Native az (@("containerapp", "registry", "set", "--server", $server, "--identity", $pullIdentity, "-o", "none") + $appTarget) -AllowFailure
         if ($DryRun -or $ok) { $configured = $true; break }
         Info "Role assignment is still propagating (attempt $attempt of 8); waiting 20 seconds"
         Start-Sleep -Seconds 20
@@ -282,7 +339,10 @@ Info "Switching to $deployRef"
 $createdRevision = Invoke-Native az (@("containerapp", "update", "--image", $deployRef, "--query", "properties.latestRevisionName", "-o", "tsv") + $appTarget) -Capture
 Info "update accepted; latest revision: $createdRevision"
 
-if ($DryRun) { Write-Host "`nDry run finished: nothing was built, pushed or changed." -ForegroundColor Yellow; return }
+if ($DryRun) {
+    if (-not $NoParamUpdate) { Info "$(Split-Path $ParamFile -Leaf): $(Update-ParamFile -Path $ParamFile -NewImage $deployRef -AppName $AppName -RegistryName $Registry -WhatIf) (image would be set to the new digest)" }
+    Write-Host "`nDry run finished: nothing was built, pushed or changed." -ForegroundColor Yellow; return
+}
 
 Step "Waiting for the new revision (up to $TimeoutMinutes minutes)"
 $deadline = (Get-Date).AddMinutes($TimeoutMinutes)
@@ -325,6 +385,12 @@ if ($fqdn) {
 }
 else { Info "The app has no ingress, so only the revision health was checked." }
 
+$paramResult = $null
+if (-not $NoParamUpdate) {
+    $paramResult = Update-ParamFile -Path $ParamFile -NewImage $deployRef -AppName $AppName -RegistryName $Registry
+    Info "$(Split-Path $ParamFile -Leaf): $paramResult"
+}
+
 Write-Host "`nDeployed." -ForegroundColor Green
 Info "app:       $AppName ($AppResourceGroup)"
 Info "revision:  $newRevision (previous: $oldRevision)"
@@ -332,3 +398,4 @@ Info "image:     $deployRef"
 Info "was:       $currentImage$(if ($previousRef -ne $currentImage) { "  (resolved to $previousRef before this run moved the tag)" })"
 if ($fqdn) { Info "url:       https://$fqdn" }
 Info "roll back: az containerapp update -n $AppName -g $AppResourceGroup --image $previousRef"
+if ($paramResult -eq "updated") { Info "next:      commit $(Split-Path $ParamFile -Leaf) so a later redeploy of the Bicep template keeps this version" }
