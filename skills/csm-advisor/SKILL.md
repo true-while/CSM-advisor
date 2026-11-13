@@ -8,12 +8,12 @@ description: >-
   Learn catalog items with catalog links. Stage 5 writes a Skilling Paths proposal Word document by
   audience. Debug logging is optional. Do NOT use for per-file summaries or to author new decks,
   documents, or workbooks.
-metadata: {version: "1.1.17", cowork-category: "productivity", cowork-icon: "BookOpen"}
+metadata: {version: "1.1.18", cowork-category: "productivity", cowork-icon: "BookOpen"}
 ---
 
 ## Version and Bundled References
 
-- **Current version:** `1.1.17`
+- **Current version:** `1.1.18`
 - **Stages 1-2 - signal collection rules:** [references/SIGNAL-COLLECTION.md](references/SIGNAL-COLLECTION.md)
 - **Stage 1 - supported formats:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
 - **Stage 1 - Teams meeting recaps:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
