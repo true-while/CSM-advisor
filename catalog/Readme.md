@@ -110,12 +110,15 @@ download is incomplete), so the running container needs no internet access.
 
 ```powershell
 docker build -t csm-learn-catalog .
-docker run --rm -p 8000:8000 csm-learn-catalog
+docker run --rm -p 127.0.0.1:8000:8000 csm-learn-catalog
 ```
 
 Podman works the same way (`podman build`, `podman run`). On Windows, run `podman machine init` and
 `podman machine start` once first. Add `-e API_KEY=<value>` to `docker run` to require the `x-api-key`
 header. Then open <http://localhost:8000/docs>.
+
+Publish the port on `127.0.0.1` as shown. With Podman on Windows, a plain `-p 8000:8000` also listens
+on IPv6, and browsers that try `localhost` over IPv6 first get `ERR_EMPTY_RESPONSE`.
 
 ## Deploy to Azure Container Apps
 
