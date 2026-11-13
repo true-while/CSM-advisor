@@ -15,7 +15,7 @@ COPY app ./app
 # The build fails if the download is incomplete. Rebuild the image to refresh the catalog.
 RUN python -m app.fetch "$CATALOG_PATH"
 
-RUN useradd --system --uid 10001 appuser
+RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin appuser
 USER appuser
 
 EXPOSE 8000

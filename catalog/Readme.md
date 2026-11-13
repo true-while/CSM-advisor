@@ -113,6 +113,10 @@ docker build -t csm-learn-catalog .
 docker run --rm -p 8000:8000 csm-learn-catalog
 ```
 
+Podman works the same way (`podman build`, `podman run`). On Windows, run `podman machine init` and
+`podman machine start` once first. Add `-e API_KEY=<value>` to `docker run` to require the `x-api-key`
+header. Then open <http://localhost:8000/docs>.
+
 ## Deploy to Azure Container Apps
 
 Not yet deployed. These commands use `az containerapp up`, which builds the image from the Dockerfile in
