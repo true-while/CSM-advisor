@@ -6,6 +6,7 @@ for keyword search. It is built to run as an Azure Container App.
 - **Search by keyword**, with optional filters by **roles** and **levels** (and products and types).
 - **Ranked by popularity** (highest first).
 - **Returns all information**: every result carries the complete, unchanged catalog record.
+- **Look up a class by its code** (for example `AI-3025`) and get back the learning paths and modules it covers.
 
 The whole catalog is loaded into memory when the service starts (about 1 s, about 170 MB), so a query
 takes about a millisecond. The service makes no outbound calls while running.
@@ -17,6 +18,8 @@ Interactive documentation is at `/docs` and the OpenAPI schema at `/openapi.json
 | Endpoint | What it does |
 |----------|--------------|
 | `GET /search` | Keyword search with optional filters, ranked by popularity |
+| `GET /classes/{code}` | One class (instructor-led course) by its code, such as `AI-3025`, with the learning paths and modules it covers. See [Classes](#classes) |
+| `GET /classes` | Search classes by code or by words in the name, with their modules. See [Classes](#classes) |
 | `GET /items/{uid}` | One complete record. Add `?expand=true` to also get the records it refers to (a learning path's modules, a module's units, a course's study guide) and the records that refer to it. References that do not exist in the catalog are listed under `unresolved` |
 | `GET /taxonomies`, `GET /taxonomies/{levels\|products\|roles\|subjects}` | The valid filter ids, exactly as in the catalog file |
 | `GET /meta` | What is loaded, record counts per collection, and when the catalog file was written |
@@ -88,6 +91,67 @@ All 8 collections of the catalog file are served: `modules`, `units`, `learningP
 - `unit` records (about 28,000 one-line lessons) are searched only when you ask for `types=unit`.
 - Some uids referenced by the catalog (for example a few modules inside learning paths) do not exist in
   it. That is a property of the data; `?expand=true` reports them under `unresolved`.
+
+## Classes
+
+A class is an instructor-led course in the catalog (`courses`), identified by a code such as `AB-650T00`
+or `AI-3025`. Each class has a *study guide*: the learning paths (and sometimes modules) that make it up.
+The API follows that study guide and returns the learning modules the class covers.
+
+```text
+GET /classes/AI-3025
+```
+
+```json
+{
+  "uid": "course.ai-3025", "type": "course", "class_code": "AI-3025", "link": "https://learn.microsoft.com/en-us/training/courses/ai-3025/",
+  "item": { "...the complete class record, unchanged..." },
+  "learning_paths": [ { "uid": "learn.wwl.work-smarter-with-ai", "item": { "...complete record..." } } ],
+  "modules": [
+    { "uid": "learn.wwl.work-smarter-with-ai", "link": "https://learn.microsoft.com/en-us/training/modules/…/",
+      "popularity": 0.5, "item": { "...the complete module record, unchanged..." },
+      "via_learning_paths": ["learn.wwl.work-smarter-with-ai"], "direct": false }
+  ],
+  "unresolved": [],
+  "totals": { "learning_paths": 1, "modules": 1, "duration_minutes": 42, "unresolved": 0 },
+  "also_matches": []
+}
+```
+
+- **Codes:** case, punctuation and the delivery suffix do not matter. `AI-3025`, `ai3025`, `AI 3025` and
+  `AI-3025T00` find the same class, and `AB-650` finds `AB-650T00`. A code that exists twice (for example `T00`
+  and `T01`) returns one class and lists the other in `also_matches`; naming the suffix picks that one.
+- **Modules:** listed in study-guide order, each once, even when several learning paths contain it.
+  `via_learning_paths` says which paths it came through, and `direct` is true when the study guide lists the
+  module itself. `totals.duration_minutes` is the sum of the module durations in the catalog.
+- **`unresolved`:** references in the study guide that are not in the catalog (the data has a few, for example a
+  module inside a learning path that does not exist). They are listed with a reason and never guessed; the totals
+  count only what resolved.
+- **Not found:** an unknown code returns `404` with the nearest codes (`AI-3015` gives `AI-3008`, `AI-3025`,
+  `AI-3026`, ...). Nothing is made up for a class that is not in the catalog.
+
+`GET /classes` searches classes, using a code or words from the class name:
+
+| Parameter | Default | Notes |
+|-----------|---------|-------|
+| `q` | empty | A class code, or words from the name. A class whose code equals the query comes first (`match: "code"`), then name matches by relevance (`match: "keywords"`). Empty lists all classes |
+| `roles`, `levels`, `products` | none | Optional filters, as in `/search`. They also apply to a code match |
+| `match` | `all` | For words: every word (`all`) or at least one (`any`) |
+| `include_modules` | `true` | `false` returns the class and its `totals` without the module lists |
+| `limit`, `offset` | 5, 0 | `limit` is 1 to 25 |
+
+If `q` looks like a code that does not exist, the response has `total: 0`, a `warning`, and `suggestions` with the
+nearest codes. Classes have no popularity value, so they are not ranked by popularity.
+
+**What is in the data.** At the time of writing the catalog has about 135 classes, of which about 87 have a real code
+and can be looked up by it (these numbers change as Microsoft updates the catalog; `GET /meta` shows the current
+ones under `classes`). The rest, 48 at the time of writing and mostly education courses, have no code or only a text
+alias such as `MSLEAIBootcampFUN`; they are found by words in their name and return `class_code: null`. The catalog
+uses Microsoft Learn's own numbering, so it does not contain every class code you may have seen elsewhere (for
+example `AI-3015` is not in it).
+
+**Response size.** A class returns the complete record of every module, so one class is about 30 KB and a page of
+25 is about 750 KB. Use `limit`, or `include_modules=false` and then `GET /classes/{code}` for the one you want.
 
 ## Run it locally
 
