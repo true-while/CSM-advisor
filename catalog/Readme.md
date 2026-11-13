@@ -169,10 +169,65 @@ subscriptions. The Azure CLI must be signed in to every tenant involved.
 
 The repository is `csm-learn-catalog`. Other repositories in the registry are not touched.
 
-### Creating the app from scratch
+## A stable URL (Bicep)
 
-The script updates an existing app. To create one, use `az containerapp create` with ingress on port 8000,
-for example with an API key (clients then send the header `x-api-key`; `/health` stays open):
+The app's URL is `https://<app name>.<environment default domain>`, for example
+`https://learn-catalog.yellowgrass-5e694844.eastus2.azurecontainerapps.io`. No domain registration is needed.
+
+The default domain is generated **once, when the Container Apps environment is created**, and then never
+changes. So the URL stays the same through new image versions, new revisions, scaling, and even deleting and
+recreating the app, as long as:
+
+1. the **environment is kept**, and
+2. the app keeps its **name**.
+
+It changes only if the environment is deleted and recreated, or the app is renamed. Each revision also has its
+own address (`<app>--<revision>.<domain>`), which does change; use the plain app URL.
+
+[deploy/main.bicep](deploy/main.bicep) deploys the app with that in mind:
+
+- It deploys **into the existing environment** (`createEnvironment = false` by default), so the domain is kept.
+- It puts a **delete lock** on the environment, so the domain cannot be lost by accident. The lock still
+  allows updates. Remove it first (`az lock delete`) if you really want to delete the environment.
+- The app pulls its image with a **user-assigned managed identity** that gets the **AcrPull** role on the
+  registry, so there is no registry password. The registry must be in the same Microsoft Entra tenant.
+- Ingress on port 8000, `/health` liveness and readiness probes, a single active revision (the previous
+  revision keeps serving until the new one is healthy).
+- Optional API key: set the `CATALOG_API_KEY` environment variable before deploying. Clients then send the
+  `x-api-key` header; `/health` stays open. Empty means no key.
+
+Edit [deploy/main.bicepparam](deploy/main.bicepparam) (app name, environment, registry, image digest), then:
+
+```powershell
+cd catalog/deploy
+az deployment group what-if -g <resource-group> -f main.bicep -p main.bicepparam   # preview, changes nothing
+az deployment group create  -g <resource-group> -f main.bicep -p main.bicepparam
+```
+
+The deployment prints the `url`. To deploy a different image, pass it on the command line
+(`-p image=<registry>.azurecr.io/csm-learn-catalog@sha256:...`); `publish-image.ps1` prints the digest.
+`publish-image.ps1` updates the running app directly, so if you later redeploy the template, give it the digest
+that is currently running (`az containerapp show -n <app> -g <rg> --query properties.template.containers[0].image`),
+or it will go back to the digest in the parameter file.
+
+**First-time deployment** into a resource group that has no environment: add `-p createEnvironment=true`. The
+template then creates the environment (and a Log Analytics workspace) and the URL's domain is generated at that
+moment. Re-running it later with `true` for the same group and name keeps the same environment, and the same
+domain.
+
+**Notes**
+
+- The first deployment creates the AcrPull role assignment and starts the app straight away. A new role can take
+  a minute or two to take effect, so if the first revision fails to pull the image, run the deployment again.
+- The identity has no secrets: the template is safe to keep in source control.
+- Needs permission to create role assignments on the registry (Owner or User Access Administrator).
+- To use a registry in another tenant (for example when `az` is signed in to a different one), the app needs a
+  registry username and password instead of a managed identity. This template does not support that.
+
+### Creating the app without Bicep
+
+The script updates an existing app. To create one by hand, use `az containerapp create` with ingress on port
+8000, for example with an API key (clients then send the header `x-api-key`; `/health` stays open):
 
 ```powershell
 az containerapp create -n <app> -g <rg> --environment <environment> `
