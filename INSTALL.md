@@ -22,14 +22,14 @@ The result is always a **proposal** for MTT and account-stakeholder validation -
 Download the plugin ZIP using the link below. It always points to the newest version - you don't
 need to build or unzip anything yourself:
 
-[**Download Signal-led Customer Skilling**](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
+[**Download Signal-led Customer Skilling**](https://github.com/true-while/signal-led-customer-skilling/releases/latest/download/CSM-advisor.zip)
 
 <!-- latest-version:start -->
-Latest published version: **v1.1.25** (released 2026-11-18) - [release notes](https://github.com/true-while/CSM-advisor/releases/tag/v1.1.25)
+Latest published version: **v1.1.25** (released 2026-11-18) - [release notes](https://github.com/true-while/signal-led-customer-skilling/releases/tag/v1.1.25)
 <!-- latest-version:end -->
 
 Keep the downloaded `CSM-advisor.zip` file intact - don't unzip it or edit its contents.
-(Every past version also stays available on the [Releases page](https://github.com/true-while/CSM-advisor/releases) if you ever need an older one.)
+(Every past version also stays available on the [Releases page](https://github.com/true-while/signal-led-customer-skilling/releases) if you ever need an older one.)
 
 ## 2. Install in Cowork
 

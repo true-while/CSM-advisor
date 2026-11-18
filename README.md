@@ -12,14 +12,14 @@ The output is always a proposal for MTT and account-stakeholder validation.
 
 ## Install
 
-Step-by-step instructions: **https://true-while.github.io/CSM-advisor/**
+Step-by-step instructions: **https://true-while.github.io/signal-led-customer-skilling/**
 
 Direct download (always the latest version):
-[Signal-led Customer Skilling (CSM-advisor.zip)](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
+[Signal-led Customer Skilling (CSM-advisor.zip)](https://github.com/true-while/signal-led-customer-skilling/releases/latest/download/CSM-advisor.zip)
 
-All versions are listed on the [Releases page](https://github.com/true-while/CSM-advisor/releases).
+All versions are listed on the [Releases page](https://github.com/true-while/signal-led-customer-skilling/releases).
 
 ## Documentation
 
-- [Install guide (GitHub Pages)](https://true-while.github.io/CSM-advisor/)
+- [Install guide (GitHub Pages)](https://true-while.github.io/signal-led-customer-skilling/)
 - [INSTALL.md](INSTALL.md)
