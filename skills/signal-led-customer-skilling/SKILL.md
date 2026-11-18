@@ -13,7 +13,7 @@ description: |
   commercial account plans, booking, registration, sending, policy approval
   or installing skills. Return advisory drafts only.
 metadata: {
-  version: "1.1.25", 
+  version: "1.1.26", 
   cowork-category: "productivity", 
   cowork-icon: "Rocket"
 }

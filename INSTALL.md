@@ -25,7 +25,7 @@ need to build or unzip anything yourself:
 [**Download Signal-led Customer Skilling**](https://github.com/true-while/signal-led-customer-skilling/releases/latest/download/CSM-advisor.zip)
 
 <!-- latest-version:start -->
-Latest published version: **v1.1.25** (released 2026-11-18) - [release notes](https://github.com/true-while/signal-led-customer-skilling/releases/tag/v1.1.25)
+Latest published version: **v1.1.26** (released 2026-11-18) - [release notes](https://github.com/true-while/signal-led-customer-skilling/releases/tag/v1.1.26)
 <!-- latest-version:end -->
 
 Keep the downloaded `CSM-advisor.zip` file intact - don't unzip it or edit its contents.
