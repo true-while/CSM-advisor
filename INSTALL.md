@@ -25,7 +25,7 @@ need to build or unzip anything yourself:
 [**Download Signal-led Customer Skilling**](https://github.com/true-while/signal-led-customer-skilling/releases/latest/download/signal-led-customer-skilling.zip)
 
 <!-- latest-version:start -->
-Latest published version: **v1.1.27** (released 2026-11-18) - [release notes](https://github.com/true-while/signal-led-customer-skilling/releases/tag/v1.1.27)
+Latest published version: **v1.1.28** (released 2026-11-18) - [release notes](https://github.com/true-while/signal-led-customer-skilling/releases/tag/v1.1.28)
 <!-- latest-version:end -->
 
 Keep the downloaded `signal-led-customer-skilling.zip` file intact - don't unzip it or edit its contents.
