@@ -9,14 +9,19 @@ to them, or list them.
 
 ## Source order
 
-1. **Bundled Learn catalog (default).** `ms-learn-catalog.json` in the skill folder is a snapshot of
-   the public Microsoft Learn catalog (modules and learning paths), rebuilt at every plugin release.
-   Search it only with `scripts/search_catalog.py`; do not open the JSON file directly - it is several
-   MB. It records `generated_at`: state that date in the Skills Map.
-2. **Live Microsoft Learn search**, only if the catalog file is missing, the script cannot run, or a
-   skill has no usable match. Use whatever Learn, documentation, or web-search tool Cowork provides
-   and log that the fallback was used.
-3. **No source works:** list the skill under Open Gaps with the reason and continue. Never guess.
+1. **Live Microsoft Learn catalog API (default).** The deployed `scm-advisor` service
+   (`https://scm-advisor.azurewebsites.net`) mirrors the public Microsoft Learn catalog and is
+   refreshed at least daily. Search it only with `scripts/search_catalog.py`, which calls the
+   service's `/search` endpoint; do not call the API directly. It reports `generated_at`: state
+   that date in the Skills Map.
+2. **Bundled snapshot, automatic fallback.** If the live service cannot be reached,
+   `scripts/search_catalog.py` falls back automatically to `ms-learn-catalog.json` in the skill
+   folder (a snapshot rebuilt at every plugin release) and marks the output `"source":
+   "bundled-snapshot"`. No separate action is needed; just read the script's output.
+3. **Live Microsoft Learn web search**, only if the script fails entirely (service unreachable
+   and no bundled snapshot) or a skill has no usable match from either source. Use whatever Learn,
+   documentation, or web-search tool Cowork provides and log that the fallback was used.
+4. **No source works:** list the skill under Open Gaps with the reason and continue. Never guess.
 
 ## Rules
 
@@ -46,9 +51,11 @@ to them, or list them.
    ```
 
    Filters: `--product <id>`, `--role <id>`, `--level <id>`, `--type module|path`. Use the ids shown
-   by `--facets`; drop a filter if it removes good matches (note it in the log when debug is on). The output lists
-   each match's title, link, level, minutes, the modules of a path or the paths of a module, a
-   `strength` label, and a `debug` object (copy it into the log only when debug is on).
+   by `--facets`; drop a filter if it removes good matches (note it in the log when debug is on). The
+   output lists each match's title, link, level, minutes, a `strength` label, and a `debug` object
+   (copy it into the log only when debug is on). A learning path match also lists the uids of its
+   modules; to resolve a module uid to its title, or to see which paths a module belongs to, run
+   `python scripts/search_catalog.py --item <uid> --expand` on the chosen candidate.
 4. **Go over the whole skill set**, not one skill at a time:
    - Choose the best match for each skill; prefer a learning path when several of a skill's best
      matches are modules of the same path.

@@ -21,8 +21,10 @@ metadata: {version: "1.1.21", cowork-category: "productivity", cowork-icon: "Boo
 - **Stage 3 - path selection rules:** [references/PATH-SELECTION.md](references/PATH-SELECTION.md)
 - **Stage 4 - mapping skills to the Learn catalog:** [references/LEARN-MODULES.md](references/LEARN-MODULES.md)
 - **Stage 4 - Skills Map template:** [references/SKILLS-MAP-TEMPLATE.md](references/SKILLS-MAP-TEMPLATE.md)
-- **Stage 4 - bundled Learn catalog (snapshot):** `ms-learn-catalog.json`, searched only through
-  `scripts/search_catalog.py` (never load the whole file into context)
+- **Stage 4 - Learn catalog search:** `scripts/search_catalog.py` queries the live catalog API
+  (`https://scm-advisor.azurewebsites.net`), falling back automatically to the bundled snapshot
+  `ms-learn-catalog.json` if the live service is unreachable (never load either source into context
+  directly - go through the script)
 - **Stage 5 - Skilling Paths proposal template:** [references/SKILLING-PATH-TEMPLATE.md](references/SKILLING-PATH-TEMPLATE.md)
 - **Optional debug logging (any stage):** [references/DEBUG-LOG.md](references/DEBUG-LOG.md)
 

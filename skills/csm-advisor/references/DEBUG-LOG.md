@@ -54,10 +54,10 @@ steps by stage (1.1, 1.2, 2.1, ...).
   behind the match, and the final decision (or "no path selected" and why).
 
 **Stage 4 - Map required skills**
-- The catalog: file present, `generated_at`, and counts. If the catalog or script failed: the error
-  and the fallback used.
+- The catalog: `source` (live service or bundled-snapshot), `generated_at`, and counts. If the live
+  service and the bundled snapshot both failed: the error and that the web-search fallback was used.
 - Every required skill: id, name, the search phrase(s), the exact `search_catalog.py` command or the
-  live search used, filters, and from the script's own `debug` object - items considered, items
+  web-search fallback used, filters, and from the script's own `debug` object - items considered, items
   matched, strong matches. Then the chosen catalog items and the coverage result (Covered / Partly
   covered / Not covered).
 - Totals: skills derived, skills covered, partly covered, not covered, distinct catalog items used.
@@ -73,9 +73,9 @@ steps by stage (1.1, 1.2, 2.1, ...).
 
 ```text
 Debug - Stage 4
-- Input: Signals Summary (14 signals); catalog snapshot 2026-11-11 (3458 modules, 834 paths)
+- Input: Signals Summary (14 signals); catalog source: live (scm-advisor), updated 2026-11-11
 - Skills: 9 derived; 6 covered, 2 partly, 1 not covered; 11 distinct catalog items
-- Search: 9 script calls, 0 errors; no live-search fallback
+- Search: 9 script calls, 0 errors; no web-search fallback
 - Warnings: skill S9 "<name>" had no strong match
 - Output: Skills Map - <customer> - <date>.docx
 ```

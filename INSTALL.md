@@ -92,7 +92,10 @@ there. Run `git pull` after a push to get the bot's version-bump commit.
 To package locally, run `python scripts/build_learn_catalog.py` first, then `./scripts/package.ps1`.
 The catalog is a snapshot of the public Learn catalog API: it is refreshed only when a release is
 built, and the build fails rather than shipping an empty or oversized file (Cowork limits each
-companion file to 5 MB).
+companion file to 5 MB). At runtime the skill searches the live `scm-advisor` catalog service first
+(always up to date) and only falls back to this bundled snapshot if that service is unreachable - see
+[skills/csm-advisor/references/LEARN-MODULES.md](skills/csm-advisor/references/LEARN-MODULES.md).
+
 
 Keep the same `id` (GUID) in `manifest.json` across updates so Cowork treats it as an update to the
 existing plugin rather than a new installation. The release workflow never overwrites or replaces an

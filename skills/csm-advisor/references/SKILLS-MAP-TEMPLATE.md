@@ -1,7 +1,8 @@
 # Stage 4 - Skills Map Template
 
 Goal: list the training skills the customer needs (detected from the Stage 2 signals and the Stage 3 path) and map every
-skill to items from the bundled Microsoft Learn catalog (`ms-learn-catalog.json`), with the links
+skill to items from the Microsoft Learn catalog (the live `scm-advisor` service, falling back to the
+bundled snapshot `ms-learn-catalog.json` if the live service is unreachable), with the links
 that come from the catalog. Produce exactly one Word (`.docx`) document, separate from the Signals
 Summary and the Skilling Paths proposal.
 
@@ -47,7 +48,7 @@ debug logging is on (the request asked for it), add the `Debug - Stage 4` block 
 
 Generated: <date>
 Based on: <Signals Summary file name/date>
-Catalog snapshot: <generated_at> (<modules> modules, <paths> learning paths) - links come from this catalog
+Catalog source: <live service / bundled snapshot>, catalog updated <generated_at>
 Status: <Ready | Ready with gaps | No skills detected>
 
 ## Summary

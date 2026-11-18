@@ -1,39 +1,33 @@
-// Deploys the catalog search container to Azure Container Apps with a stable public URL.
+// Deploys the catalog search container to an Azure Web App (Linux, Web App for Containers) with a stable
+// public URL.
 //
-// The URL is https://<appName>.<environment default domain>. The default domain is generated once, when the
-// Container Apps environment is created, and then never changes. So the URL stays the same through image
-// updates, new revisions, and even deleting and recreating the app, as long as two things hold:
-//   1. the environment is kept (this template deploys INTO an existing environment unless createEnvironment is
-//      true, and puts a delete lock on it), and
-//   2. the app keeps its name.
-// No custom domain is needed.
+// The URL is https://<appName>.azurewebsites.net. Web App names are globally unique and the hostname is
+// derived only from the app name, so the URL stays the same through image updates and container restarts
+// as long as the app keeps its name. No custom domain or separate "environment" resource is needed.
 //
 // The app pulls its image from Azure Container Registry with a user-assigned managed identity that is granted
 // the AcrPull role, so there is no registry password. The registry must be in the same Microsoft Entra tenant.
+//
+// Basic tier runs a single instance with no deployment slots: unlike Container Apps, there is no previous
+// version left serving traffic while a new image starts, so a bad image takes the app down until fixed.
 //
 //   az deployment group what-if -g <rg> -f main.bicep -p main.bicepparam
 //   az deployment group create  -g <rg> -f main.bicep -p main.bicepparam
 targetScope = 'resourceGroup'
 
 // ---------------------------------------------------------------- App and URL
-@description('Name of the Container App. It is the first part of the public URL, so changing it changes the URL.')
+@description('Name of the Web App. It is also the first part of the public URL, so changing it changes the URL: https://<appName>.azurewebsites.net. Web App names are globally unique across Azure.')
 @minLength(2)
-@maxLength(32)
-param appName string = 'learn-catalog'
+@maxLength(60)
+param appName string = 'scm-advisor'
 
-@description('Name of the Container Apps environment. Its default domain, the rest of the URL, is fixed when the environment is created.')
-param environmentName string
+@description('Name of the Linux App Service Plan that hosts the app. Created if it does not already exist.')
+param planName string = 'plan-${appName}'
 
-@description('Create the environment. Use true only for a first-time deployment into a resource group that has none. Re-deploying with true to the same group and name keeps the existing environment and its domain. Leave false to deploy into an existing environment.')
-param createEnvironment bool = false
+@description('App Service Plan SKU (Basic tier), for example B1, B2 or B3.')
+param planSku string = 'B1'
 
-@description('Protect the environment with a CanNotDelete lock. Deleting an environment gives the next one a new domain, so this protects the URL. Remove the lock first if you really want to delete it.')
-param lockEnvironment bool = true
-
-@description('Workload profile of the environment. Leave empty for a Consumption-only environment (the older kind). Ignored when createEnvironment is true, which creates a workload-profiles environment with the Consumption profile.')
-param workloadProfileName string = ''
-
-@description('Azure region. It must match the environment, so by default it is the region of the resource group.')
+@description('Azure region.')
 param location string = resourceGroup().location
 
 param tags object = {}
@@ -52,46 +46,27 @@ param registryResourceGroup string = resourceGroup().name
 param registrySubscriptionId string = subscription().subscriptionId
 
 // ---------------------------------------------------------------- Runtime
-@description('Optional. When set, every call except /health must send this value in the x-api-key header. Leave empty for an open API. Stored as a Container Apps secret.')
+@description('Optional. When set, every call except /health must send this value in the x-api-key header. Leave empty for an open API. Stored as an app setting.')
 @secure()
 param apiKey string = ''
 
-@description('CPU cores, for example 0.5.')
-param cpu string = '0.5'
-
-@description('Memory, for example 1Gi. The service needs about 200 MB.')
-param memory string = '1Gi'
-
-@minValue(0)
-param minReplicas int = 1
-
-@minValue(1)
-param maxReplicas int = 2
-
 var port = 8000
-var environmentId = resourceId('Microsoft.App/managedEnvironments', environmentName)
-var profileName = createEnvironment ? 'Consumption' : workloadProfileName
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d' // built-in "AcrPull"
 var hasApiKey = !empty(apiKey)
 
-// ---------------------------------------------------------------- Environment (first-time only) and lock
-module environment 'modules/environment.bicep' = if (createEnvironment) {
-  name: 'environment-${environmentName}'
-  params: {
-    name: environmentName
-    location: location
-    tags: tags
+// ---------------------------------------------------------------- Plan (Linux, Basic tier)
+resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
+  name: planName
+  location: location
+  tags: tags
+  sku: {
+    name: planSku
+    tier: 'Basic'
   }
-}
-
-module environmentLock 'modules/environment-lock.bicep' = if (lockEnvironment) {
-  name: 'lock-${environmentName}'
-  params: {
-    environmentName: environmentName
+  kind: 'linux'
+  properties: {
+    reserved: true // required for Linux plans
   }
-  dependsOn: [
-    environment
-  ]
 }
 
 // ---------------------------------------------------------------- Pull access: managed identity + AcrPull
@@ -101,13 +76,8 @@ resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' 
   tags: tags
 }
 
-resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
-  name: registryName
-  scope: resourceGroup(registrySubscriptionId, registryResourceGroup)
-}
-
 module acrPull 'modules/acr-pull.bicep' = {
-  name: 'acr-pull-${appName}'
+  name: 'acr-pull-${uniqueString(appName)}'
   scope: resourceGroup(registrySubscriptionId, registryResourceGroup)
   params: {
     registryName: registryName
@@ -118,10 +88,11 @@ module acrPull 'modules/acr-pull.bicep' = {
 }
 
 // ---------------------------------------------------------------- The app
-resource app 'Microsoft.App/containerApps@2025-01-01' = {
+resource app 'Microsoft.Web/sites@2023-12-01' = {
   name: appName
   location: location
   tags: tags
+  kind: 'app,linux,container'
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -129,85 +100,35 @@ resource app 'Microsoft.App/containerApps@2025-01-01' = {
     }
   }
   properties: {
-    environmentId: environmentId
-    workloadProfileName: empty(profileName) ? null : profileName
-    configuration: {
-      activeRevisionsMode: 'Single' // the previous revision keeps serving until the new one is healthy
-      ingress: {
-        external: true
-        targetPort: port
-        transport: 'auto'
-        allowInsecure: false
-      }
-      registries: [
+    serverFarmId: plan.id
+    httpsOnly: true
+    siteConfig: {
+      linuxFxVersion: 'DOCKER|${image}'
+      acrUseManagedIdentityCreds: true
+      acrUserManagedIdentityID: identity.properties.clientId
+      alwaysOn: true // Basic tier supports Always On; keeps the single instance from idling out
+      healthCheckPath: '/health'
+      appSettings: concat([
         {
-          server: registry.properties.loginServer
-          identity: identity.id
+          name: 'WEBSITES_PORT'
+          value: string(port)
         }
-      ]
-      secrets: hasApiKey ? [
+      ], hasApiKey ? [
         {
-          name: 'api-key'
+          name: 'API_KEY'
           value: apiKey
         }
-      ] : []
-    }
-    template: {
-      containers: [
-        {
-          name: 'catalog'
-          image: image
-          resources: {
-            cpu: json(cpu)
-            memory: memory
-          }
-          env: hasApiKey ? [
-            {
-              name: 'API_KEY'
-              secretRef: 'api-key'
-            }
-          ] : []
-          probes: [
-            {
-              type: 'Liveness'
-              httpGet: {
-                path: '/health'
-                port: port
-              }
-              initialDelaySeconds: 10
-              periodSeconds: 30
-              failureThreshold: 3
-            }
-            {
-              type: 'Readiness'
-              httpGet: {
-                path: '/health'
-                port: port
-              }
-              initialDelaySeconds: 3
-              periodSeconds: 10
-              failureThreshold: 3
-            }
-          ]
-        }
-      ]
-      scale: {
-        minReplicas: minReplicas
-        maxReplicas: maxReplicas
-      }
+      ] : [])
     }
   }
   dependsOn: [
-    environment
     acrPull
   ]
 }
 
 @description('The stable public URL of the API.')
-output url string = 'https://${app.properties.configuration.ingress.fqdn}'
-
-@description('The newest revision of the app.')
-output latestRevision string = app.properties.latestRevisionName
+output url string = 'https://${app.properties.defaultHostName}'
 
 @description('Principal id of the managed identity that pulls the image.')
 output identityPrincipalId string = identity.properties.principalId
+

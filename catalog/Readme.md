@@ -1,7 +1,7 @@
 # Microsoft Learn catalog search service
 
 A small web API (FastAPI) that serves the [Microsoft Learn catalog](https://learn.microsoft.com/api/catalog/)
-for keyword search. It is built to run as an Azure Container App.
+for keyword search. It is built to run as an Azure Web App (Linux, Web App for Containers).
 
 - **Search by keyword**, with optional filters by **roles** and **levels** (and products and types).
 - **Ranked by popularity** (highest first).
@@ -184,10 +184,10 @@ header. Then open <http://localhost:8000/docs>.
 Publish the port on `127.0.0.1` as shown. With Podman on Windows, a plain `-p 8000:8000` also listens
 on IPv6, and browsers that try `localhost` over IPv6 first get `ERR_EMPTY_RESPONSE`.
 
-## Publish the image and update the Container App
+## Publish the image and update the Web App
 
 [deploy/publish-image.ps1](deploy/publish-image.ps1) builds the image, pushes it to an Azure Container
-Registry, and updates the Container App `learn-catalog` (resource group `alex-app-containers`) to the new
+Registry, and updates the Web App `scm-advisor` (resource group `csm-agent`) to the new
 version. Run `az login` first. You need AcrPush on the registry and Contributor on the app.
 
 ```powershell
@@ -212,25 +212,26 @@ What it does, in order:
    password is stored) and **pushes** an immutable tag (`<yyyyMMdd>-<git sha>`, with `-dirty` if the folder
    has uncommitted changes) and, unless `-NoLatest` is given, `latest`. It refuses to overwrite a tag.
 4. **Updates the app to the image digest** (`<server>/csm-learn-catalog@sha256:...`), so a later `latest`
-   push cannot change what is running. It waits for the new revision to be healthy, then calls the app's
-   `/health` and `/meta` and checks that it is serving the catalog downloaded by this run.
+   push cannot change what is running. This restarts the container. It waits for the app's `/health` and
+   `/meta` to answer and checks that it is serving the catalog downloaded by this run.
 5. **Updates [deploy/main.bicepparam](deploy/main.bicepparam)** with the new digest, so a later redeploy of the
    Bicep template does not roll the app back. It only does this when the file is for the same app and
-   registry, and only after the new revision is healthy. Commit the change. Use `-NoParamUpdate` to skip it.
+   registry, and only after the app is healthy again. Commit the change. Use `-NoParamUpdate` to skip it.
 6. **Prints the previous image** and the command to roll back to it. A moving tag such as `latest` is
    resolved to its digest before the push, because this run moves the tag; the rollback command uses
    the digest.
 
-In Single revision mode the previous revision keeps serving traffic until the new one is healthy, so an
-image that fails to start does not take the app down.
+The Basic tier plan runs a single instance with no deployment slots, so (unlike Container Apps) there is no
+previous version left serving traffic while the new image starts: a bad image takes the app down until it
+is fixed or rolled back.
 
 ### How the app pulls from the registry
 
 | Situation | What the script does |
 |-----------|----------------------|
-| The app already has access to the registry (for example an app deployed with [deploy/main.bicep](deploy/main.bicep), which pulls with a user-assigned managed identity) | Keeps it as it is |
-| Not configured, and the app and the registry are in the same Microsoft Entra tenant | Uses the app's user-assigned managed identity (if it has exactly one) or enables its system-assigned identity, grants it **AcrPull** on the registry, and configures the app to use it. Needs permission to create role assignments (Owner or User Access Administrator). A new role assignment can take a minute or two, so the script retries |
-| Not configured, and they are in different tenants | Stops before building. A managed identity cannot be granted access across tenants. Publish to a registry the app already pulls from (`-Registry`), or give the app credentials for the registry first (`az containerapp registry set ... --username ... --password ...`) |
+| The app already pulls with a managed identity (for example an app deployed with [deploy/main.bicep](deploy/main.bicep), which pulls with a user-assigned managed identity) | Keeps it as it is |
+| Not configured, and the app and the registry are in the same Microsoft Entra tenant | Uses the app's user-assigned managed identity (if it has exactly one) or enables its system-assigned identity, grants it **AcrPull** on the registry, and configures the app to use it. Needs permission to create role assignments (Owner or User Access Administrator). A new role assignment can take a minute or two, so the script waits before configuring the app |
+| Not configured, and they are in different tenants | Stops before building. A managed identity cannot be granted access across tenants. Publish to a registry the app already pulls from (`-Registry`), or give the app credentials for the registry first (`az webapp config container set ... --docker-registry-server-user ... --docker-registry-server-password ...`) |
 
 The script selects subscriptions per command (`--subscription`) and does not change your default Azure
 CLI subscription. Use `-RegistrySubscription` and `-AppSubscription` if the two are in different
@@ -240,32 +241,23 @@ The repository is `csm-learn-catalog`. Other repositories in the registry are no
 
 ## A stable URL (Bicep)
 
-The app's URL is `https://<app name>.<environment default domain>`, for example
-`https://learn-catalog.yellowgrass-5e694844.eastus2.azurecontainerapps.io`. No domain registration is needed.
+The app's URL is `https://scm-advisor.azurewebsites.net`. No domain registration is needed.
 
-The default domain is generated **once, when the Container Apps environment is created**, and then never
-changes. So the URL stays the same through new image versions, new revisions, scaling, and even deleting and
-recreating the app, as long as:
-
-1. the **environment is kept**, and
-2. the app keeps its **name**.
-
-It changes only if the environment is deleted and recreated, or the app is renamed. Each revision also has its
-own address (`<app>--<revision>.<domain>`), which does change; use the plain app URL.
+Web App names are **globally unique across Azure**, and the hostname is derived only from the app name, so
+the URL stays the same through new image versions and container restarts as long as the app keeps its
+**name**. It changes only if the app is renamed (or deleted and recreated under a different name).
 
 [deploy/main.bicep](deploy/main.bicep) deploys the app with that in mind:
 
-- It deploys **into the existing environment** (`createEnvironment = false` by default), so the domain is kept.
-- It puts a **delete lock** on the environment, so the domain cannot be lost by accident. The lock still
-  allows updates. Remove it first (`az lock delete`) if you really want to delete the environment.
+- A **Linux App Service Plan** (Basic tier, `B1` by default - set `planSku` for `B2`/`B3`) hosts the app.
 - The app pulls its image with a **user-assigned managed identity** that gets the **AcrPull** role on the
   registry, so there is no registry password. The registry must be in the same Microsoft Entra tenant.
-- Ingress on port 8000, `/health` liveness and readiness probes, a single active revision (the previous
-  revision keeps serving until the new one is healthy).
+- Container port 8000 (`WEBSITES_PORT` app setting), `/health` as the health check path, `Always On` enabled
+  so the single instance does not idle out.
 - Optional API key: set the `CATALOG_API_KEY` environment variable before deploying. Clients then send the
   `x-api-key` header; `/health` stays open. Empty means no key.
 
-Edit [deploy/main.bicepparam](deploy/main.bicepparam) (app name, environment, registry, image digest), then:
+Edit [deploy/main.bicepparam](deploy/main.bicepparam) (app name, plan, registry, image digest), then:
 
 ```powershell
 cd catalog/deploy
@@ -278,18 +270,18 @@ The deployment prints the `url`. To deploy a different image, pass it on the com
 `publish-image.ps1` updates the running app directly and then writes the new digest into `main.bicepparam`
 (commit it), so redeploying the template keeps the version the script deployed. If you used `-NoParamUpdate`,
 or the file is not committed, give the template the digest that is currently running
-(`az containerapp show -n <app> -g <rg> --query properties.template.containers[0].image`), or it will go back
-to the digest in the parameter file.
+(`az webapp config show -n <app> -g <rg> --query linuxFxVersion`), or it will go back to the digest in the
+parameter file.
 
-**First-time deployment** into a resource group that has no environment: add `-p createEnvironment=true`. The
-template then creates the environment (and a Log Analytics workspace) and the URL's domain is generated at that
-moment. Re-running it later with `true` for the same group and name keeps the same environment, and the same
-domain.
+**Basic tier runs a single instance with no deployment slots**: unlike Container Apps, there is no previous
+version left serving traffic while a new image starts, so a bad image takes the app down until it is fixed
+or rolled back. Deployment slots (zero-downtime swaps) need Standard tier or higher.
 
 **Notes**
 
 - The first deployment creates the AcrPull role assignment and starts the app straight away. A new role can take
-  a minute or two to take effect, so if the first revision fails to pull the image, run the deployment again.
+  a minute or two to take effect, so if the app fails to pull the image at first, restart it once the role has
+  propagated (`az webapp restart -n <app> -g <rg>`).
 - The identity has no secrets: the template is safe to keep in source control.
 - Needs permission to create role assignments on the registry (Owner or User Access Administrator).
 - To use a registry in another tenant (for example when `az` is signed in to a different one), the app needs a
@@ -297,17 +289,19 @@ domain.
 
 ### Creating the app without Bicep
 
-The script updates an existing app. To create one by hand, use `az containerapp create` with ingress on port
-8000, for example with an API key (clients then send the header `x-api-key`; `/health` stays open):
+The script updates an existing app. To create one by hand, use `az webapp create` with a Linux plan (Basic
+tier or higher), for example with an API key (clients then send the header `x-api-key`; `/health` stays open):
 
 ```powershell
-az containerapp create -n <app> -g <rg> --environment <environment> `
-  --image "<registry>.azurecr.io/csm-learn-catalog:latest" --registry-server "<registry>.azurecr.io" `
-  --registry-identity system --ingress external --target-port 8000 --cpu 0.5 --memory 1.0Gi --min-replicas 1 `
-  --secrets api-key=<choose-a-long-random-value> --env-vars API_KEY=secretref:api-key
+az appservice plan create -n <plan> -g <rg> --is-linux --sku B1
+az webapp create -n <app> -g <rg> -p <plan> `
+  --deployment-container-image-name "<registry>.azurecr.io/csm-learn-catalog:latest"
+az webapp config appsettings set -n <app> -g <rg> --settings WEBSITES_PORT=8000 API_KEY=<choose-a-long-random-value>
+az webapp config set -n <app> -g <rg> --health-check-path /health --always-on true
 ```
 
 Then grant the app's identity AcrPull on the registry, as described above.
+
 
 ### Keeping the catalog current
 
