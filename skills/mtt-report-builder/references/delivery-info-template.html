@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!--
+  MTT DELIVERY SUMMARY — CANONICAL TEMPLATE (v3)
+  Rendered by mtt-report-builder for reportType: info (the "Delivery Summary").
+  The CSS below is the shared house style for ALL mtt-report-builder report types — do not fork it.
+
+  HOW TO FILL:
+  - Copy this file, substitute {{PLACEHOLDER}} values, repeat one <div class="bar-row"> per category row.
+  - Scalars: {{DELIVERY_ID}}, {{COURSE_CODE}}, {{COURSE_TITLE}}, {{TYPE}}, {{MODALITY}}, {{PHASE}},
+    {{START}}, {{END}}, {{DURATION}}, {{TIMEZONE}}, {{LOCATION}}, {{REG}}, {{CAP}}, {{REG_PCT}},
+    {{LAB_CODE}}, {{SURVEY_URL}}, {{TRAINER}}, {{CO_TRAINER}}, {{CUSTOMER}}, {{LEARNER_COUNT}},
+    {{TPM_INSTRUCTIONS}}, {{CAP_LABEL}}, {{REG_HEALTH}}, {{INDUSTRY_CAVEAT}}, {{SOURCES}}, {{GENERATED_AT}}, {{GLYPH_PRIVACY}}.
+  - {{GENERATED_AT}} also appears UP in the header band ("As of …") — not only in the footer. Fill both.
+  - FOOTER (always) — every report ends with the Sources / Privacy / Generated footer card. {{SOURCES}} = the
+    data provenance (e.g. "esiadmin Dynamics 365 via mtt-esiadmin-lookup — delivery <id>, event registrations,
+    roster" + any web/other sources, each dated). {{GENERATED_AT}} = the current LOCAL datetime (trainer's zone,
+    from runtime context) — the report's as-of time. The Privacy line is a fixed default; keep it verbatim
+    unless the caller supplies stricter wording.
+  - THEME is the FY27 Learning Lab skin (warm #FFF8F3 base · deep navy #091F2E · purple/teal/blue accents ·
+    Segoe UI Semibold headings) — shared with base-template.html. {{GLYPH_PRIVACY}} → inline the Shield_Privacy
+    SVG per references/glyphs.md (dynamic fetch → bundled fallback → omit if unavailable).
+  - {{PHASE}} — read delivery.phase (resolver-derived, past/present/future) and render its display label:
+    future → "Upcoming", present → "In progress", past → "Completed", canceled → "Canceled" (use class
+    b-canceled for canceled). Do NOT recompute from dates.
+  - {{DURATION}} — a generic span label, NOT a day-index. Render "Single-day" when delivery.dayCount = 1, else
+    "N days" (delivery.dayCount). NEVER "Day M of N today" — that's wrong for a multi-delivery day and needs no
+    day-math; the past/present/future read is {{PHASE}} / delivery.phase. Fall back to the officialStart→officialEnd
+    day span only if dayCount is null.
+  - {{CAP_LABEL}} — from delivery.capacity.basis: delivery-max → "Capacity"; expected-headcount → "Expected
+    headcount"; catalog-default → "Catalog capacity". {{CAP}} = delivery.capacity.value. Never label an
+    expected/catalog value as a hard "Capacity".
+  - Registration Health ({{REG_HEALTH}} = delivery.registrationHealth) → badge class b-green / b-yellow /
+    b-red; OMIT the whole field when null.
+  - MODALITY badge: class b-vilt (VILT, green) | b-ilt (ILT, red) | else neutral b-type.
+  - TPM / TPC / TPM Instructions: render the field ONLY if a value is present in the delivery data — OMIT the
+    whole <div> when null (do NOT render "— (none)"). CUSTOMER always renders. TPM Instructions →
+    delivery.tpmInstruction, rendered in the Notes card.
+  - NOTES CARD: render the whole card ONLY when >=1 note field has content; OMIT the entire card when all are
+    null. The raw msdyn_instructions field is gone; the card is now TPM-Instructions-only but extensible.
+  - Copy button: render the <button> only when the value is real; drop it for a placeholder like
+    "Not assigned yet".
+  - SUMMARY (top card): statistics bullets, NOT a paragraph. Only cite a breakdown group when its learner
+    count is > 3 (the 1-3 tail stays out of the summary but remains in the charts below). Percentages are
+    of the active-registered total. LANGUAGE: mention it only when genuinely mixed (no single language
+    >=90%). Compose the four bullets; omit a bullet only if its data is absent.
+  - LEARNER BACKGROUND category pattern (ROLE FAMILIES, INDUSTRY, ORGANISATION, REGION, LANGUAGE):
+      * ROLE FAMILIES comes from roster.roleFamilies.registered (canonical role->family rollup) — render the
+        family buckets, NEVER individual job roles (families are the PII-appropriate view).
+      * Sort rows by count desc; width% = value / (max in this category) * 100; width:0% for 0.
+      * Render the TOP 4 rows in the first .chart (all rows if the category has <=4).
+      * TAIL RULE: if MORE THAN 3 rows remain after the top 4, wrap them in <details class="moredetails">
+        (summary "Show N more <category>"). If 3 OR FEWER remain, render them inline in the same .chart —
+        no <details> (a 1-3 item toggle is pure friction).
+      * INDUSTRY vs ORGANISATION are two SEPARATE subsections: INDUSTRY groups learners by employer
+        esi_industry; ORGANISATION lists individual employers.
+      * INDUSTRY / ORGANISATION VISIBILITY: render each of these two subsections ONLY when it has >=3
+        distinct categories (>=3 industries / >=3 employers). With fewer than 3 (e.g. a single-customer
+        Private delivery, or a multi-account delivery sharing one industry), OMIT that whole subsection
+        (label + charts) — the Customer field and the remaining categories already carry the signal.
+      * Add class "cat-last" to the final rendered category's .chart for trailing spacing.
+  - Population = deduped ACTIVE REGISTERED learners (by esi_learnerid); exclude test/admin accounts.
+  - Escape HTML (&, <, >). Save to output/delivery-{{DELIVERY_ID}}-info.html.
+  - Validate with the html validator (default mode): status success, zero external references.
+-->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Delivery Summary — {{DELIVERY_ID}}</title>
+<style>
+  /* FY27 Learning Lab palette — warm off-white base, deep navy ink, purple/teal/blue accents */
+  :root{
+    --bg:#fff8f3; --card:#ffffff; --ink:#091f2e; --muted:#5a6a77;
+    --line:#eee6de; --accent:#8661c5; --accent-soft:#efeafb;
+    --neutral:#f2ede6; --neutral-ink:#4a5560;
+    --warn-ink:#8a6d00; --warn-soft:#fff4ce;
+    --bar:#389a91; --bar-track:#efe8df; --field:#faf6f1;
+    --head-grad:linear-gradient(135deg,#fff8f3 0%,#f3ecfb 55%,#e9f4f1 100%);
+    --fh:'Segoe UI Semibold','Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#091f2e; --card:#12293a; --ink:#fff8f3; --muted:#9fb2c0;
+      --line:#22384a; --accent:#c5b4e3; --accent-soft:#20304a;
+      --neutral:#1c3345; --neutral-ink:#d5e0ea;
+      --warn-ink:#ffd95e; --warn-soft:#3d3413;
+      --bar:#49c5b1; --bar-track:#1c3140; --field:#0e2536;
+      --head-grad:linear-gradient(135deg,#132a3c,#1a2c48 55%,#123338);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45; padding:24px}
+  h1,h2,.eyebrow{font-family:var(--fh)}
+  .wrap{max-width:960px; margin-inline:auto}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:20px 24px; margin-block-end:18px}
+  .head{background:var(--head-grad); border-inline-start:5px solid var(--accent);
+    display:flex; justify-content:space-between; align-items:flex-start; gap:14px 20px; flex-wrap:wrap}
+  .head-main{min-width:0}
+  .eyebrow{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0}
+  h1{font-size:26px; margin:.15em 0 .1em}
+  .course{font-size:16px; color:var(--muted); margin:0}
+  .gen-stamp{font-size:13.5px; color:var(--muted); text-align:end; white-space:nowrap; margin:0;
+    padding:7px 13px; border:1px solid var(--line); border-radius:8px; background:var(--card)}
+  .gen-stamp strong{color:var(--ink); font-family:var(--fh)}
+  .badges{margin-block-start:14px; display:flex; flex-wrap:wrap; gap:8px}
+  .badge{font-size:12px; font-weight:600; padding:4px 10px; border-radius:999px; white-space:nowrap}
+  .b-vilt{background:#389a91; color:#ffffff}
+  .b-ilt{background:#0078d4; color:#ffffff}
+  .b-type{background:var(--neutral); color:var(--neutral-ink)}
+  .b-phase{background:var(--accent-soft); color:var(--accent)}
+  .b-canceled{background:#c50f1f; color:#ffffff}
+  .b-green{background:#107c10; color:#ffffff}
+  .b-yellow{background:#8a6d00; color:#ffffff}
+  .b-red{background:#c50f1f; color:#ffffff}
+  h2{font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+     margin:0 0 14px; border-block-end:1px solid var(--line); padding-block-end:8px}
+  .summary-list{margin:0; padding-inline-start:20px; font-size:15px}
+  .summary-list li{margin-block:5px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px 24px}
+  .field .lbl{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin:0}
+  .field .val{font-size:15px; font-weight:600; margin:2px 0 0; word-break:break-word}
+  .reg-track{height:8px; background:var(--bar-track); border-radius:6px; margin-block-start:8px; overflow:hidden}
+  .reg-fill{height:100%; background:var(--bar); border-radius:6px}
+  .copyfield{display:flex; align-items:center; gap:10px; background:var(--field);
+    border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-block-start:14px}
+  .cf-label{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); flex:0 0 130px}
+  .cf-val{font-family:'Cascadia Code',Consolas,'Courier New',monospace; font-size:13.5px;
+    flex:1; overflow-x:auto; white-space:nowrap; user-select:all; -webkit-user-select:all}
+  .cf-btn{flex:0 0 auto; font:inherit; font-size:12px; font-weight:600; cursor:pointer;
+    background:transparent; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 14px}
+  .cf-btn:hover{border-color:var(--accent); color:var(--accent)}
+  .sub{font-size:12px; letter-spacing:.05em; color:var(--muted); margin:0 0 8px}
+  .chart{display:flex; flex-direction:column; gap:8px; margin-block-end:10px}
+  .bar-row{display:flex; align-items:center; gap:12px; font-size:14px}
+  .bar-row .name{flex:0 0 180px; line-height:1.2}
+  .bar-track{flex:1; height:22px; background:var(--bar-track); border-radius:6px; overflow:hidden}
+  .bar-fill{display:block; height:100%; background:var(--bar); border-radius:6px}
+  .bar-row .count{flex:0 0 30px; text-align:end; font-weight:700}
+  details.moredetails{margin-block-end:22px}
+  summary.moresummary{cursor:pointer; font-size:13px; font-weight:600; color:var(--accent);
+    list-style:none; padding:2px 0; display:inline-block}
+  summary.moresummary::-webkit-details-marker{display:none}
+  summary.moresummary::before{content:'\25B8\00a0'}
+  details[open] summary.moresummary::before{content:'\25BE\00a0'}
+  details.moredetails .chart{margin-block:12px 0}
+  .cat-last{margin-block-end:22px}
+  .lb-summary{font-size:14px; color:var(--muted); margin:0 0 18px}
+  .catnote{font-size:12px; color:var(--muted); font-style:italic; margin:2px 0 22px}
+  .catnote:empty{display:none}
+  .callout{background:var(--warn-soft); color:var(--warn-ink); border-radius:8px;
+    padding:12px 16px; font-size:13.5px; margin-block-start:4px}
+  .note .val{font-weight:400; font-size:14px}
+  .foot{font-size:12px; color:var(--muted); text-align:center; margin-block-start:6px}
+  .report-footer{font-size:12px; color:var(--muted); line-height:1.65}
+  .report-footer p{margin:0 0 6px} .report-footer p:last-child{margin:0}
+  .report-footer strong{color:var(--ink)}
+  .report-footer svg{width:16px; height:16px; vertical-align:-3px; margin-inline-end:6px}
+  @media print{ body{background:#fff; padding:0} .card{break-inside:avoid; border-color:#ccc} .cf-btn{display:none} details.moredetails summary{display:none} details.moredetails .chart{margin-block-start:0} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card head">
+    <div class="head-main">
+      <p class="eyebrow">MTT Delivery Summary</p>
+      <h1>Delivery {{DELIVERY_ID}}</h1>
+      <p class="course">{{COURSE_CODE}} — {{COURSE_TITLE}}</p>
+      <div class="badges">
+        <span class="badge b-vilt">{{MODALITY}}</span><!-- b-vilt (VILT) | b-ilt (ILT) | b-type -->
+        <span class="badge b-type">{{TYPE}}</span>
+        <span class="badge b-phase">{{PHASE}}</span><!-- b-phase | b-canceled for a canceled delivery -->
+      </div>
+    </div>
+    <!-- Generated datetime — TOP-RIGHT of the summary header (also repeated in the footer). Render as
+         "Generated: <local datetime>". Explains "why" a field like the lab key may not be populated yet. -->
+    <p class="gen-stamp"><strong>Generated:</strong> {{GENERATED_AT}}</p>
+  </div>
+
+  <div class="card">
+    <h2>Summary</h2>
+    <!-- Statistics bullets. Only cite a breakdown group whose learner count is > 3. Percentages of the
+         active-registered total. Mention LANGUAGE only when genuinely mixed (no single language >=90%). -->
+    <ul class="summary-list">
+      <li><strong>Enrolment:</strong> {{REG}} registered learners · capacity {{CAP}}.</li>
+      <li><strong>Check-in:</strong> {{CHECKED_IN}} of {{REG}} checked in ({{CHECKED_IN_PCT}}%) · {{NOT_CHECKED_IN}} not yet checked in ({{NOT_CHECKED_IN_PCT}}%) · {{NO_SHOWS}}.</li>
+      <li><strong>Top roles:</strong> {{TOP_ROLES}}.</li><!-- roles with >3 learners, "Name N (P%)" · joined -->
+      <li><strong>Reach:</strong> {{TOP_REGION}} · {{ORG_COUNT}} organisations · {{COUNTRY_COUNT}} countries.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>General</h2>
+    <div class="grid">
+      <div class="field"><p class="lbl">Start</p><p class="val">{{START}}</p></div>
+      <div class="field"><p class="lbl">End</p><p class="val">{{END}}</p></div>
+      <div class="field"><p class="lbl">Duration</p><p class="val">{{DURATION}}</p></div>
+      <div class="field"><p class="lbl">Event Timezone</p><p class="val">{{TIMEZONE}}</p></div>
+      <div class="field"><p class="lbl">Location</p><p class="val">{{LOCATION}}</p></div>
+      <!-- Registration Health: render ONLY when delivery.registrationHealth is present; badge class b-green | b-yellow | b-red. Omit the whole field otherwise. -->
+      <div class="field"><p class="lbl">Registration Health</p><p class="val"><span class="badge b-green">{{REG_HEALTH}}</span></p></div>
+      <div class="field">
+        <p class="lbl">Registration / {{CAP_LABEL}}</p>
+        <p class="val">{{REG}} / {{CAP}}</p>
+        <div class="reg-track"><div class="reg-fill" style="width:{{REG_PCT}}%"></div></div>
+      </div>
+    </div>
+    <div class="copyfield">
+      <span class="cf-label">Student Lab Code</span>
+      <code class="cf-val">{{LAB_CODE}}</code>
+      <button class="cf-btn" type="button" data-copy="{{LAB_CODE}}" aria-label="Copy Student Lab Code">Copy</button>
+    </div>
+    <div class="copyfield">
+      <span class="cf-label">Survey URL</span>
+      <code class="cf-val">{{SURVEY_URL}}</code>
+      <button class="cf-btn" type="button" data-copy="{{SURVEY_URL}}" aria-label="Copy Survey URL">Copy</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Delivery</h2>
+    <div class="grid">
+      <div class="field"><p class="lbl">Trainer (Primary)</p><p class="val">{{TRAINER}}</p></div>
+      <div class="field"><p class="lbl">Co-Trainer</p><p class="val">{{CO_TRAINER}}</p></div>
+      <div class="field"><p class="lbl">Customer</p><p class="val">{{CUSTOMER}}</p></div>
+      <!-- TPM / TPC: ONE combined field, on a single line. Compose {{TPM_TPC}} from the roles present —
+           "TPM <name>" and/or "TPC <name>", joined by " · ". OMIT the whole field when BOTH are null. -->
+      <div class="field"><p class="lbl">TPM / TPC</p><p class="val">{{TPM_TPC}}</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Learner Background</h2>
+    <p class="lb-summary">Composition of the registered learners — {{LEARNER_COUNT}} profiled (unique learners; test/admin accounts excluded). Longer categories show the top 4, with the remainder collapsed.</p>
+
+    <!-- CATEGORY PATTERN — top 4 in the first .chart; if >3 rows remain, wrap the rest in
+         <details class="moredetails"> ("Show N more <category>"); if <=3 remain, render inline (no details).
+         Sort by count desc; width% = value / (max in this category) * 100. -->
+
+    <!-- ROLE FAMILIES — from roster.roleFamilies.registered (canonical role->family rollup). Render the
+         family buckets, NEVER individual job roles (families are the PII-appropriate view). -->
+    <p class="sub">ROLE FAMILIES</p>
+    <div class="chart">
+      <div class="bar-row"><div class="name">{{FAMILY_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+      <!-- ...top 4 role-family rows... -->
+    </div>
+    <details class="moredetails"><!-- ONLY if >3 role families remain -->
+      <summary class="moresummary">Show {{N}} more role families</summary>
+      <div class="chart">
+        <div class="bar-row"><div class="name">{{FAMILY_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+      </div>
+    </details>
+
+    <!-- INDUSTRY — render this whole block ONLY when there are >=3 distinct industries; otherwise omit it. -->
+    <p class="sub">INDUSTRY</p>
+    <div class="chart">
+      <div class="bar-row"><div class="name">{{INDUSTRY_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+      <!-- ...top 4 industry rows... -->
+    </div>
+    <details class="moredetails"><!-- ONLY if >3 industries remain -->
+      <summary class="moresummary">Show {{N}} more industries</summary>
+      <div class="chart">
+        <div class="bar-row"><div class="name">{{INDUSTRY_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+      </div>
+    </details>
+
+    <!-- INDUSTRY caveat: when any INDUSTRY bar includes an agentic (map-inferred) classification, mark those bars with a trailing " *" and render this ONE short caveat directly BELOW the INDUSTRY chart. Omit when nothing is inferred. -->
+    <p class="catnote">{{INDUSTRY_CAVEAT}}</p>
+
+    <!-- ORGANISATION — render this whole block ONLY when there are >=3 distinct employers; otherwise omit it. -->
+    <p class="sub">ORGANISATION</p>
+    <div class="chart">
+      <div class="bar-row"><div class="name">{{ORG_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+      <!-- ...top 4 employer rows... -->
+    </div>
+    <details class="moredetails"><!-- ONLY if >3 employers remain -->
+      <summary class="moresummary">Show {{N}} more organisations</summary>
+      <div class="chart">
+        <div class="bar-row"><div class="name">{{ORG_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+      </div>
+    </details>
+
+    <p class="sub">REGION</p>
+    <div class="chart">
+      <div class="bar-row"><div class="name">{{REGION_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+      <!-- ...top 4 region rows; add a "Show N more regions" details ONLY if >3 remain... -->
+    </div>
+
+    <p class="sub">LANGUAGE</p>
+    <div class="chart cat-last">
+      <div class="bar-row"><div class="name">{{LANGUAGE_NAME}}</div><div class="bar-track"><div class="bar-fill" style="width:{{PCT}}%"></div></div><div class="count">{{COUNT}}</div></div>
+    </div>
+  </div>
+
+  <!-- NOTES CARD — render this WHOLE card ONLY when at least one note field has content.
+       OMIT the entire <div class="card"> (heading and all) when every note field is null — never render an
+       empty Notes card. Extensible: future note fields slot in here as their own conditional
+       <div class="field note">, and the card renders iff >=1 is present.
+       The raw msdyn_instructions ("Instructions") field was removed — it was a stale free-text holdover of
+       no value to the trainer; add it back here as a conditional field only if a real use emerges. -->
+  <div class="card">
+    <h2>Notes</h2>
+    <!-- TPM Instructions: render ONLY when delivery.tpmInstruction is non-null. -->
+    <div class="field note"><p class="lbl">TPM Instructions</p><p class="val">{{TPM_INSTRUCTIONS}}</p></div>
+  </div>
+
+  <div class="card report-footer">
+    <p><strong>Sources:</strong> {{SOURCES}}</p>
+    <p>{{GLYPH_PRIVACY}}<strong>Privacy:</strong> Aggregate composition only — no learner names, emails, or PII. The student lab code and any trainer-internal fields are for the trainer's use; do not distribute.</p>
+    <p><strong>Generated:</strong> {{GENERATED_AT}} · MTT Delivery Summary · Delivery {{DELIVERY_ID}} · times shown in the event timezone.</p>
+    <!-- AI disclaimer: the Microsoft-standard subtle footer line. Keep it plain (not bold) by default; upgrade to bold + a link to the org AI policy only on request. This one line is the whole AI disclosure — NO inline per-section AI tags. -->
+    <p>AI-generated content may be inaccurate. Check for accuracy.</p>
+  </div>
+
+</div>
+<script>
+document.querySelectorAll('.cf-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    var t = b.getAttribute('data-copy');
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t); }
+    var o = b.textContent; b.textContent = 'Copied'; setTimeout(function(){ b.textContent = o; }, 1200);
+  });
+});
+</script>
+</body>
+</html>

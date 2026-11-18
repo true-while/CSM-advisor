@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<!--
+  MTT REPORT — FY27 BASE TEMPLATE (Learning Lab skin)   ·   report-builder
+  This is the SHARED shell for AD-HOC reports. The delivery-info report has its own specialised
+  template (delivery-info-template.html) built on this same theme — keep the two visually consistent.
+
+  HOW TO FILL:
+  - Scalars: {{EYEBROW}}, {{TITLE}}, {{SUBTITLE}}, {{BADGES}} (0+ <span class="badge b-*">…</span>),
+    {{CONTENT}} (the report body — compose from the component classes below), {{SOURCES}},
+    {{GENERATED_AT}}, {{GLYPH_PRIVACY}}.
+  - THEME (do NOT restyle): warm #FFF8F3 base · deep navy #091F2E ink · accents purple #8661C5 /
+    teal #389A91 / blue #0078D4 · Segoe UI Semibold headings. Adapts to system dark mode.
+  - COMPONENTS available inside {{CONTENT}}:
+      · <div class="card"> … </div>                     — section container; start with <h2>SECTION</h2>
+      · <div class="kpis"> <div class="kpi"><div class="n">57</div><div class="l">Label</div></div> … </div>
+      · <div class="grid"> <div class="field"><p class="lbl">Label</p><p class="val">Value</p></div> … </div>
+      · <div class="chart"> <div class="bar-row"><span class="name">X</span>
+          <span class="bar-track"><span class="bar-fill" style="width:80%"></span></span><span class="count">8</span></div> … </div>
+      · <div class="callout"> warning / caveat </div>
+      · <div class="copyfield"><span class="cf-label">Label</span><span class="cf-val">value</span></div>
+      · badges: b-accent / b-teal / b-blue / b-good / b-warn / b-bad / b-neutral
+  - FOOTER is mandatory (Sources / Privacy / Generated) — house style for every report; keep it.
+  - GLYPHS: resolve {{GLYPH_*}} via references/glyphs.md (dynamic SharePoint fetch → bundled fallback →
+    omit if unavailable). FY27 glyphs are multicolour 3-D — use sparingly, as accents.
+  - Save to output/, validate with the html validator (status success, zero external refs), pass the delivery gate.
+-->
+<style>
+  /* FY27 Learning Lab palette — warm off-white base, deep navy ink, purple/teal/blue accents */
+  :root{
+    --bg:#fff8f3; --card:#ffffff; --ink:#091f2e; --muted:#5a6a77;
+    --line:#eee6de; --accent:#8661c5; --accent-soft:#efeafb;
+    --neutral:#f2ede6; --neutral-ink:#4a5560;
+    --warn-ink:#8a6d00; --warn-soft:#fff4ce;
+    --bar:#389a91; --bar-track:#efe8df; --field:#faf6f1;
+    --head-grad:linear-gradient(135deg,#fff8f3 0%,#f3ecfb 55%,#e9f4f1 100%);
+    --fh:'Segoe UI Semibold','Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#091f2e; --card:#12293a; --ink:#fff8f3; --muted:#9fb2c0;
+      --line:#22384a; --accent:#c5b4e3; --accent-soft:#20304a;
+      --neutral:#1c3345; --neutral-ink:#d5e0ea;
+      --warn-ink:#ffd95e; --warn-soft:#3d3413;
+      --bar:#49c5b1; --bar-track:#1c3140; --field:#0e2536;
+      --head-grad:linear-gradient(135deg,#132a3c,#1a2c48 55%,#123338);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45; padding:24px}
+  h1,h2,.eyebrow{font-family:var(--fh)}
+  .wrap{max-width:960px; margin-inline:auto}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:20px 24px; margin-block-end:18px}
+  .head{background:var(--head-grad); border-inline-start:5px solid var(--accent)}
+  .eyebrow{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0}
+  h1{font-size:26px; margin:.15em 0 .1em}
+  .subtitle{font-size:16px; color:var(--muted); margin:0}
+  .badges{margin-block-start:14px; display:flex; flex-wrap:wrap; gap:8px}
+  .badge{font-size:12px; font-weight:600; padding:4px 10px; border-radius:999px; white-space:nowrap}
+  .b-accent{background:#8661c5; color:#ffffff}
+  .b-teal{background:#389a91; color:#ffffff}
+  .b-blue{background:#0078d4; color:#ffffff}
+  .b-good{background:#107c10; color:#ffffff}
+  .b-warn{background:#8a6d00; color:#ffffff}
+  .b-bad{background:#c50f1f; color:#ffffff}
+  .b-neutral{background:var(--neutral); color:var(--neutral-ink)}
+  h2{font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+     margin:0 0 14px; border-block-end:1px solid var(--line); padding-block-end:8px}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin-block-end:4px}
+  .kpi{background:var(--field); border:1px solid var(--line); border-radius:10px; padding:12px 14px; text-align:center}
+  .kpi .n{font-size:24px; font-weight:700; font-family:var(--fh); line-height:1.1}
+  .kpi .l{font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-block-start:4px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px 24px}
+  .field .lbl{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin:0}
+  .field .val{font-size:15px; font-weight:600; margin:2px 0 0; word-break:break-word}
+  .chart{display:flex; flex-direction:column; gap:8px; margin-block-end:10px}
+  .bar-row{display:flex; align-items:center; gap:12px; font-size:14px}
+  .bar-row .name{flex:0 0 180px; line-height:1.2}
+  .bar-track{flex:1; height:22px; background:var(--bar-track); border-radius:6px; overflow:hidden}
+  .bar-fill{display:block; height:100%; background:var(--bar); border-radius:6px}
+  .bar-row .count{flex:0 0 30px; text-align:end; font-weight:700}
+  .callout{background:var(--warn-soft); color:var(--warn-ink); border-radius:8px;
+    padding:12px 16px; font-size:13.5px; margin-block-start:4px}
+  .copyfield{display:flex; align-items:center; gap:10px; background:var(--field);
+    border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-block-start:14px}
+  .cf-label{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); flex:0 0 130px}
+  .cf-val{font-family:'Cascadia Code',Consolas,'Courier New',monospace; font-size:13.5px;
+    flex:1; overflow-x:auto; white-space:nowrap; user-select:all; -webkit-user-select:all}
+  .sub{font-size:12px; letter-spacing:.05em; color:var(--muted); margin:0 0 8px}
+  .report-footer{font-size:12px; color:var(--muted); line-height:1.65}
+  .report-footer p{margin:0 0 6px} .report-footer p:last-child{margin:0}
+  .report-footer strong{color:var(--ink)}
+  .report-footer svg{width:16px; height:16px; vertical-align:-3px; margin-inline-end:6px}
+  @media print{ body{background:#fff; padding:0} .card{break-inside:avoid; border-color:#ccc} }
+</style>
+</head>
+<body><div class="wrap">
+
+  <div class="card head">
+    <p class="eyebrow">{{EYEBROW}}</p>
+    <h1>{{TITLE}}</h1>
+    <p class="subtitle">{{SUBTITLE}}</p>
+    <div class="badges">{{BADGES}}</div>
+  </div>
+
+  {{CONTENT}}
+
+  <div class="card report-footer">
+    <p><strong>Sources:</strong> {{SOURCES}}</p>
+    <p>{{GLYPH_PRIVACY}}<strong>Privacy:</strong> Aggregate composition only — no learner names, emails, or PII. Trainer-internal fields are for the trainer's use; do not distribute.</p>
+    <p><strong>Generated:</strong> {{GENERATED_AT}} · MTT report · times shown in the event timezone.</p>
+  </div>
+
+</div></body></html>
