@@ -1,6 +1,6 @@
 name: Release Cowork Plugin
 
-# On every push to main this workflow picks the next version, builds dist/CSM-advisor.zip and
+# On every push to main this workflow picks the next version, builds dist/signal-led-customer-skilling.zip and
 # publishes it as a GitHub Release tagged v<version>. The version is auto-incremented (patch)
 # from the existing release tags; to start a new major/minor line, set e.g. "1.2.0" in
 # manifest.json. The bumped manifest.json, SKILL.md and INSTALL.md are committed back to main
@@ -8,7 +8,7 @@ name: Release Cowork Plugin
 # Learn catalog is downloaded fresh into the skill folder for each build; it is bundled in the ZIP
 # but not committed. Existing releases are never
 # overwritten, and the "latest" release exposes a stable download link:
-#   https://github.com/<owner>/<repo>/releases/latest/download/CSM-advisor.zip
+#   https://github.com/<owner>/<repo>/releases/latest/download/signal-led-customer-skilling.zip
 
 on:
   push:
@@ -68,7 +68,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "v${{ steps.version.outputs.version }}" \
-            dist/CSM-advisor.zip \
+            dist/signal-led-customer-skilling.zip \
             --repo "${{ github.repository }}" \
             --target "$(git rev-parse HEAD)" \
             --title "Signal-led Customer Skilling v${{ steps.version.outputs.version }}" \

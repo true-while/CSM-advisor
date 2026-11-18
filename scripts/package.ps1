@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    Packages the Signal-led Customer Skilling plugin into dist/CSM-advisor.zip for Cowork install/update.
+    Packages the Signal-led Customer Skilling plugin into dist/signal-led-customer-skilling.zip for Cowork install/update.
 #>
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root "dist"
-$zipPath = Join-Path $dist "CSM-advisor.zip"
+$zipPath = Join-Path $dist "signal-led-customer-skilling.zip"
 $stagingDir = Join-Path $dist "staging"
 
 if (Test-Path $stagingDir) { Remove-Item -Recurse -Force $stagingDir }

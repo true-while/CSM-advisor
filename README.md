@@ -15,7 +15,7 @@ The output is always a proposal for MTT and account-stakeholder validation.
 Step-by-step instructions: **https://true-while.github.io/signal-led-customer-skilling/**
 
 Direct download (always the latest version):
-[Signal-led Customer Skilling (CSM-advisor.zip)](https://github.com/true-while/signal-led-customer-skilling/releases/latest/download/CSM-advisor.zip)
+[Signal-led Customer Skilling (.zip)](https://github.com/true-while/signal-led-customer-skilling/releases/latest/download/signal-led-customer-skilling.zip)
 
 All versions are listed on the [Releases page](https://github.com/true-while/signal-led-customer-skilling/releases).
 
