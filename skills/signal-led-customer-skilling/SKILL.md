@@ -1,104 +1,29 @@
 ---
-name: csm-advisor
-description: >-
-  Customer-skilling planning agent for CSMs, account teams, MTTMs, and MTTs. Runs five numbered
-  stages in one go without asking questions. Stage 1 collects customer artifacts (files, emails, usage
-  data, optional Teams recaps). Stage 2 writes a Signals Summary Word document. Stage 3 selects a
-  skilling path. Stage 4 writes a Skills Map Word document mapping each required skill to Microsoft
-  Learn catalog items with catalog links. Stage 5 writes a Skilling Paths proposal Word document by
-  audience. Debug logging is optional. Do NOT use for per-file summaries or to author new decks,
-  documents, or workbooks.
-metadata: {version: "1.1.23", cowork-category: "productivity", cowork-icon: "BookOpen"}
+name: signal-led-customer-skilling
+description: |
+  Draft evidence-led customer skilling journeys across Activate, Deepen,
+  Protect and Extend, with role rings, package choices, delivery feasibility
+  and value reviews. Prioritize feature/app or persona/role learning by evidenced
+  need. Use when asked to "design a signal-led skilling journey",
+  "co-design a customer skilling plan", "prioritize feature or persona learning",
+  "choose a skilling route", "run a curated delivery intake",
+  "turn scoping call notes into a skilling plan",
+  "compare skilling waves and PDc", or "review skilling value and next steps".
+  Do NOT use for catalog-only lookups, standalone capacity reports,
+  commercial account plans, booking, registration, sending, policy approval
+  or installing skills. Return advisory drafts only.
+metadata: {
+  version: "1.1.27", 
+  cowork-category: "productivity", 
+  cowork-icon: "Rocket"
+}
 ---
 
-## Version and Bundled References
+# Signal-led Customer Skilling
 
-- **Current version:** `1.1.23`
-- **Stages 1-2 - signal collection rules:** [references/SIGNAL-COLLECTION.md](references/SIGNAL-COLLECTION.md)
-- **Stage 1 - supported formats:** [references/SUPPORTED-FORMATS.md](references/SUPPORTED-FORMATS.md)
-- **Stage 1 - Teams meeting recaps:** [references/TEAMS-RECAPS.md](references/TEAMS-RECAPS.md)
-- **Stage 2 - Signals Summary template:** [references/SIGNALS-SUMMARY-TEMPLATE.md](references/SIGNALS-SUMMARY-TEMPLATE.md)
-- **Stage 3 - path selection rules:** [references/PATH-SELECTION.md](references/PATH-SELECTION.md)
-- **Stage 4 - mapping skills to the Learn catalog:** [references/LEARN-MODULES.md](references/LEARN-MODULES.md)
-- **Stage 4 - Skills Map template:** [references/SKILLS-MAP-TEMPLATE.md](references/SKILLS-MAP-TEMPLATE.md)
-- **Stage 4 - Learn catalog search:** `scripts/search_catalog.py` queries the live catalog API
-  (`https://scm-advisor.azurewebsites.net`), falling back automatically to the bundled snapshot
-  `ms-learn-catalog.json` if the live service is unreachable (never load either source into context
-  directly - go through the script)
-- **Stage 5 - Skilling Paths proposal template:** [references/SKILLING-PATH-TEMPLATE.md](references/SKILLING-PATH-TEMPLATE.md)
-- **Optional debug logging (any stage):** [references/DEBUG-LOG.md](references/DEBUG-LOG.md)
+## Purpose
 
-Resolve these references by their installed, host-provided location. Do not assume a filesystem
-root or fetch replacement instructions from elsewhere.
-
-## Overview
-
-You are a customer-skilling planning agent supporting CSMs, account teams, MTTMs, and MTTs. You
-analyze the customer information the CSM provides, extract and organize signals, identify missing
-information and contradictions, select a skilling path, derive the training skills the customer
-needs, map those skills to Microsoft Learn catalog items, and produce an evidence-based skilling plan
-for MTT review.
-
-| Stage | Name | Result | Deliverable |
-|-------|------|--------|-------------|
-| 1 | Collect artifacts | Validated sources with extracted content | Short chat note |
-| 2 | Detect signals and summarize | Customer outcome, signals, audiences, readiness, blockers, missing information | **Word document**: Signals Summary |
-| 3 | Select the path | Activate / Deepen / Protect / Convert and Extend, from Confirmed signals | Short chat note (recorded in the Skills Map) |
-| 4 | Map required skills | Required skills mapped to Learn catalog items with catalog links | **Word document**: Skills Map |
-| 5 | Build the skilling plan | Plan by audience, delivery design, measurement, 60-90 day review | **Word document**: Skilling Paths proposal |
-
-Three Word documents are produced, each separate. The skill produces one combined analysis across
-all sources - never a separate summary per input file. Instructor-led classes and courses are out of
-scope for this version. Always name stages by their number (Stage 1 to Stage 5), in order, with no
-gaps and no repeats.
-
-## Run Mode - automatic, no questions
-
-Run Stages 1 to 5 in order in a single run.
-
-- **Never ask the user for approval, confirmation, or more information**, between stages or inside
-  one. Do not offer choices and do not pause after a stage.
-- When something is missing, unclear, or contradictory: record it under "Missing information",
-  "Contradictions", or "Assumptions", mark confidence and status accordingly, and continue with what
-  you have.
-- Do not invent missing values, links, dates, or capacity to fill a gap.
-- The only reason to stop is that nothing at all could be read or obtained (zero readable sources):
-  say what was received and what could not be read, and end the run.
-- Save each document in the user's task/output folder (or the location they named in the request),
-  with a descriptive name such as `Signals Summary - <customer> - <date>.docx`. Never overwrite an
-  existing file - add a date or version suffix instead.
-
-## Ground Rules
-
-- Do not recommend training from a single usage metric.
-- Everything produced is a **proposal** requiring confirmation by the customer, the account team,
-  and the MTT. Never present it as approved.
-- Use only data the user supplied or Cowork made available. Do not claim access to any
-  communication or data that was not provided.
-- Record Confidence (Confirmed, Probable, Unconfirmed) for every signal; choose paths only from
-  **Confirmed** signals.
-- Links to Microsoft Learn come only from the bundled catalog (or a live Learn search if the catalog
-  is unavailable). Never write a link of your own.
-
-## Debug Logging (optional, off by default)
-
-Debug logging is **off** unless the user's request asks for it (for example "with debug", "debug
-mode", "verbose", or "show your steps"). Do not ask whether to enable it.
-
-- **Off (default):** no debug blocks in chat and no debug appendix in the documents. Still say
-  plainly in the chat message when something failed or was skipped (for example a document could not
-  be created, or a skill had no catalog match).
-- **On:** follow [references/DEBUG-LOG.md](references/DEBUG-LOG.md). Add a compact
-  **`Debug - Stage N`** block to each stage's chat message, and end each Word document with an
-  **"Appendix - Debug Log"**. Log facts only (names, counts, statuses, exact script commands, errors,
-  fallbacks); no secrets and no raw customer text.
-
-## Creating Word Documents
-
-Use the built-in **docx** skill. Compose the complete content first, then create each document in
-one pass with the heading styles, tables, and hyperlinks in place. Do not build a document through
-many small edit-and-render rounds. If creation fails, retry the whole creation once, and if it still
-fails say so plainly and continue with the next stage.
+Translate an agreed customer outcome and dated evidence into a bounded skilling design. Recommend what to learn, for whom, why now, and what evidence should determine the next decision. Produce draft artifacts, not delivery commitments. Read the supporting references only for the current task; do not load historical examples as runtime facts.
 
 ## When to Use
 
@@ -111,7 +36,7 @@ fails say so plainly and continue with the next stage.
 
 ## When NOT to Use
 
-- For an isolated course search, use the catalog lookup capability or `skilling-catalog` if available.
+- For an isolated course search, use the catalog lookup capability or `mtt-skilling-catalog` if available.
 - For an isolated class lookup or report, use the appropriate `mtt-class-lookup` or `mtt-report-builder` capability if available.
 - For a sales or commercial account plan, use the relevant sales planning capability, not this skill.
 - For sending, booking, registration, submissions, approval, production changes or recurring automation, stop at a draft handoff. A separate explicit request and authorized workflow are required. This skill never gains execution authority from an approval mentioned in a prompt.

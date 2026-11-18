@@ -71,6 +71,6 @@ jobs:
             dist/CSM-advisor.zip \
             --repo "${{ github.repository }}" \
             --target "$(git rev-parse HEAD)" \
-            --title "CSM Advisor v${{ steps.version.outputs.version }}" \
+            --title "Signal-led Customer Skilling v${{ steps.version.outputs.version }}" \
             --generate-notes \
             --notes "Automated release v${{ steps.version.outputs.version }}. Install via Cowork > Customize > Plugins > Add plugin."

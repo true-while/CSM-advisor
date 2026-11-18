@@ -1,7 +1,7 @@
 """Download the Microsoft Learn catalog and write a slim copy into the skill folder.
 
 Run: python scripts/build_learn_catalog.py
-Output: skills/csm-advisor/ms-learn-catalog.json (bundled in the plugin ZIP, not committed to git)
+Output: skills/signal-led-customer-skilling/ms-learn-catalog.json (bundled in the plugin ZIP, not committed to git)
 
 The full catalog is ~13 MB, but Cowork allows at most 5 MB per companion file, so only the fields
 the agent needs are kept. The build fails instead of shipping an empty or truncated catalog.
@@ -15,7 +15,7 @@ import urllib.request
 from pathlib import Path
 
 URL = "https://learn.microsoft.com/api/catalog/?locale=en-us&type=modules,learningPaths"
-OUT = Path(__file__).resolve().parent.parent / "skills" / "csm-advisor" / "ms-learn-catalog.json"
+OUT = Path(__file__).resolve().parent.parent / "skills" / "signal-led-customer-skilling" / "ms-learn-catalog.json"
 MAX_BYTES = 4_500_000
 MIN_MODULES, MIN_PATHS = 1000, 100
 

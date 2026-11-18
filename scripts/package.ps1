@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Packages the CSM Advisor plugin into dist/CSM-advisor.zip for Cowork install/update.
+    Packages the Signal-led Customer Skilling plugin into dist/CSM-advisor.zip for Cowork install/update.
 #>
 $ErrorActionPreference = "Stop"
 
@@ -22,7 +22,7 @@ foreach ($item in $itemsToPackage) {
 }
 
 # The Learn catalog is generated, not committed. Release builds create it first; warn if it is missing.
-$catalog = Join-Path $stagingDir "skills\csm-advisor\ms-learn-catalog.json"
+$catalog = Join-Path $stagingDir "skills\signal-led-customer-skilling\ms-learn-catalog.json"
 if (-not (Test-Path $catalog)) {
     Write-Warning "ms-learn-catalog.json not found - run 'python scripts/build_learn_catalog.py' first to bundle it."
 }

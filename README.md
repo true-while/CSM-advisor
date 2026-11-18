@@ -1,4 +1,4 @@
-# CSM Advisor
+# Signal-led Customer Skilling
 
 A plugin for Microsoft Copilot Cowork that helps CSMs, account teams, MTTMs, and MTTs turn customer materials and Teams meeting recaps into an **evidence-based, role-based skilling plan**. It runs five stages in one go, without stopping to ask questions (add "with debug" to your request for a step-by-step debug log):
 
@@ -15,7 +15,7 @@ The output is always a proposal for MTT and account-stakeholder validation.
 Step-by-step instructions: **https://true-while.github.io/CSM-advisor/**
 
 Direct download (always the latest version):
-[CSM-advisor.zip](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
+[Signal-led Customer Skilling (CSM-advisor.zip)](https://github.com/true-while/CSM-advisor/releases/latest/download/CSM-advisor.zip)
 
 All versions are listed on the [Releases page](https://github.com/true-while/CSM-advisor/releases).
 
