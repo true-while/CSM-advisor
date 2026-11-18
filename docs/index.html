@@ -88,11 +88,6 @@
       <li>
         Download the latest release ZIP from
         <a href="https://github.com/true-while/signal-led-customer-skilling/releases/latest/download/signal-led-customer-skilling.zip">GitHub Releases</a>,
-        or build it yourself from source:
-        <div class="code-block">
-          <pre><code>./scripts/package.ps1</code></pre>
-          <button class="copy-btn" type="button">Copy</button>
-        </div>
         This produces <code>dist/signal-led-customer-skilling.zip</code>.
       </li>
       <li>Open <strong>Cowork &gt; Customize &gt; Plugins &gt; Add plugin</strong>.</li>
@@ -106,6 +101,11 @@
       </li>
       <li>Follow the on-screen installation and consent steps.</li>
       <li>Confirm <strong>Signal-led Customer Skilling</strong> appears in the installed plugins list.</li>
+            <figure>
+          <img src="assets/screenshots/plugin-added.png" alt="Cowork Plugin Added dialog">
+          <figcaption>Cowork's Plugin Added dialog.</figcaption>
+        </figure>
+    
     </ol>
     <p class="note">
       Tenant policy must permit plugin installation. If installation is blocked, contact your
@@ -117,9 +117,7 @@
     <h2>Verify</h2>
     <p>Start a new Cowork conversation and try the prompt below:</p>
     <div class="code-block">
-      <pre><code>Use Signal-led Customer Skilling to analyze this customer's materials, extract signals and readiness, and
-recommend a skilling path: &lt;attach/select the customer files&gt;.
-Include my Teams meeting recaps for &lt;customer&gt; from the last 2 weeks.</code></pre>
+      <pre><code>/signal-led-customer-skilling analyze customer signals and recommended skilling plan for company CONTOSO.COM</code></pre>
       <button class="copy-btn" type="button">Copy</button>
     </div>
     <figure>
